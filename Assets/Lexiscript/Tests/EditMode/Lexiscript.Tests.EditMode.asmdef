@@ -1,0 +1,15 @@
+{
+    "name": "Lexiscript.Tests.EditMode",
+    "rootNamespace": "Lexiscript",
+    "references": [
+        "Lexiscript",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}
