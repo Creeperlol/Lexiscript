@@ -1,0 +1,13 @@
+{
+    "name": "Lexiscript.Tests.PlayMode",
+    "rootNamespace": "Lexiscript",
+    "references": [
+        "Lexiscript",
+        "Unity.InputSystem",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
