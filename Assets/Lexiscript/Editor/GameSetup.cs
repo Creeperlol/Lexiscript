@@ -137,6 +137,7 @@ namespace Lexiscript
             SceneBuilder.Camera(spawn);
             SceneBuilder.Player(material, spawn);
             SceneBuilder.Hud();
+            new GameObject("Progress", typeof(GameProgress));
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             SceneBuilder.RegisterScenes();

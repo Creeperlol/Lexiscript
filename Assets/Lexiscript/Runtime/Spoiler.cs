@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -22,6 +23,9 @@ namespace Lexiscript
         TMP_FontAsset englishFont;
 
         public bool Revealed { get; private set; }
+
+        /// <summary>暴雷條被打開的那一刻。</summary>
+        public event Action Opened;
 
         void OnEnable()
         {
@@ -58,6 +62,7 @@ namespace Lexiscript
         {
             Revealed = true;
             Paint();
+            Opened?.Invoke();
         }
 
         void Paint()

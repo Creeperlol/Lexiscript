@@ -54,11 +54,26 @@ namespace Lexiscript
         public bool WantsIme => false;
 
         public event Action<Block> Solved;
+        /// <summary>玩家點題目那半格，露出或收起了字首字尾。</summary>
+        public event Action<Block> RevealChanged;
 
         public Reveal RevealOf(Block block) => reveals.TryGetValue(block, out var reveal) ? reveal : Reveal.None;
 
         /// <summary>滑鼠指在方塊色框上（純色格是整格）時回傳那格，指在內面或空地上回傳 null。</summary>
         public Block BandAt(Vector2 world) => Blocks.FirstOrDefault(block => block.InBand(world));
+
+        /// <summary>讀檔用：直接把這格設成已解開，不觸發 <see cref="Solved"/>，所以不會播解題特效。</summary>
+        public void RestoreSolved(Block block)
+        {
+            if (Puzzle.SetInput(block.name, Puzzle.Answer(block.name))) Refresh(block);
+        }
+
+        /// <summary>讀檔用：還原這格露出的字首或字尾，不觸發 <see cref="RevealChanged"/>。</summary>
+        public void RestoreReveal(Block block, Reveal reveal)
+        {
+            reveals[block] = reveal;
+            Refresh(block);
+        }
 
         void OnEnable()
         {
@@ -163,6 +178,7 @@ namespace Lexiscript
                 Unfocus();
                 reveals[block] = AnswerHint.Toggle(RevealOf(block), left ? Reveal.First : Reveal.Last);
                 Refresh(block);
+                RevealChanged?.Invoke(block);
                 return;
             }
             if (right)
