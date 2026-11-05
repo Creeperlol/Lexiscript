@@ -3,6 +3,7 @@
     "rootNamespace": "Lexiscript",
     "references": [
         "Lexiscript",
+        "Unity.InputSystem",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],

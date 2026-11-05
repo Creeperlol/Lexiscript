@@ -11,91 +11,72 @@ namespace Lexiscript
         {
             puzzle = new Puzzle(new[]
             {
-                new BlockDef("A", new[] { "CAT", "LION" }, new[] { "DOG" }),
-                new BlockDef("Pure", new string[0], new string[0]),
+                new BlockDef("A", "Cat", new[] { "dog" }),
+                new BlockDef("Pure", "", new string[0]),
             });
         }
 
-        void Type(string id, string text)
-        {
-            foreach (var c in text) puzzle.Type(id, c);
-        }
-
         [Test]
-        public void WrongInputIsKeptWithoutReaction()
+        public void WrongInputKeepsThePlayersCase()
         {
-            Type("A", "cow");
+            Assert.IsFalse(puzzle.SetInput("A", "cOw"));
             Assert.IsFalse(puzzle.IsSolved("A"));
-            Assert.AreEqual("COW", puzzle.Input("A"));
+            Assert.AreEqual("cOw", puzzle.Input("A"));
         }
 
         [Test]
-        public void SolvesOnTheLastLetterRegardlessOfCase()
+        public void SolvesRegardlessOfCaseAndSwitchesToTheAnswersCase()
         {
-            Assert.IsFalse(puzzle.Type("A", 'c'));
-            Assert.IsFalse(puzzle.Type("A", 'A'));
-            Assert.IsFalse(puzzle.IsSolved("A"));
-            Assert.IsTrue(puzzle.Type("A", 't'));
+            Assert.IsFalse(puzzle.SetInput("A", "cA"));
+            Assert.IsTrue(puzzle.SetInput("A", "cAT"));
             Assert.IsTrue(puzzle.IsSolved("A"));
-            Assert.AreEqual("CAT", puzzle.Input("A"));
+            Assert.AreEqual("Cat", puzzle.Input("A"));
         }
 
         [Test]
-        public void AnyAcceptedAnswerSolves()
+        public void IgnoresEverythingButAsciiLetters()
         {
-            Type("A", "Lion");
-            Assert.IsTrue(puzzle.IsSolved("A"));
-        }
-
-        [Test]
-        public void IgnoresEverythingButLetters()
-        {
-            Type("A", "c");
-            foreach (var c in new[] { '1', ' ', '-', 'é', 'ı', 'Ａ', 'ａ', '貓', '\b', '\r' })
-                Assert.IsFalse(puzzle.Type("A", c), $"U+{(int)c:X4}");
-            Assert.AreEqual("C", puzzle.Input("A"));
-        }
-
-        [Test]
-        public void BackspaceRemovesTheLastLetter()
-        {
-            puzzle.Backspace("A");
-            Assert.AreEqual("", puzzle.Input("A"));
-            Type("A", "co");
-            puzzle.Backspace("A");
-            Assert.AreEqual("C", puzzle.Input("A"));
-        }
-
-        [Test]
-        public void SolvedBlockIsLocked()
-        {
-            Type("A", "cat");
-            Assert.IsFalse(puzzle.Type("A", 's'));
-            puzzle.Backspace("A");
-            Assert.AreEqual("CAT", puzzle.Input("A"));
-            Assert.IsFalse(puzzle.IsAnswerable("A"));
+            Assert.IsFalse(puzzle.SetInput("A", "c1 -éıＡａ貓\b\r"));
+            Assert.AreEqual("c", puzzle.Input("A"));
         }
 
         [Test]
         public void InputIsCappedAt16Letters()
         {
-            Type("A", new string('x', 20));
+            puzzle.SetInput("A", new string('x', 20));
             Assert.AreEqual(Puzzle.MaxInputLength, puzzle.Input("A").Length);
+        }
+
+        [Test]
+        public void ClearOnlyAffectsUnsolvedBlocks()
+        {
+            puzzle.SetInput("A", "co");
+            puzzle.Clear("A");
+            Assert.AreEqual("", puzzle.Input("A"));
+            puzzle.SetInput("A", "cat");
+            puzzle.Clear("A");
+            Assert.AreEqual("Cat", puzzle.Input("A"));
+        }
+
+        [Test]
+        public void SolvedBlockIsLocked()
+        {
+            puzzle.SetInput("A", "cat");
+            Assert.IsFalse(puzzle.SetInput("A", "dog"));
+            Assert.AreEqual("Cat", puzzle.Input("A"));
+            Assert.IsFalse(puzzle.IsAnswerable("A"));
+            Assert.AreEqual("Cat", puzzle.Answer("A"));
         }
 
         [Test]
         public void HintOnlyWhileInputEqualsAHintAnswer()
         {
-            Type("A", "do");
+            puzzle.SetInput("A", "do");
             Assert.IsFalse(puzzle.IsHint("A"));
-            Assert.IsFalse(puzzle.Type("A", 'g'));
+            puzzle.SetInput("A", "DOG");
             Assert.IsTrue(puzzle.IsHint("A"));
             Assert.IsFalse(puzzle.IsSolved("A"));
-            puzzle.Type("A", 's');
-            Assert.IsFalse(puzzle.IsHint("A"));
-            puzzle.Backspace("A");
-            Assert.IsTrue(puzzle.IsHint("A"));
-            puzzle.Backspace("A");
+            puzzle.SetInput("A", "dogs");
             Assert.IsFalse(puzzle.IsHint("A"));
         }
 
@@ -103,8 +84,36 @@ namespace Lexiscript
         public void PureColorBlockCannotBeAnswered()
         {
             Assert.IsFalse(puzzle.IsAnswerable("Pure"));
-            Assert.IsFalse(puzzle.Type("Pure", 'a'));
+            Assert.IsFalse(puzzle.SetInput("Pure", "a"));
             Assert.AreEqual("", puzzle.Input("Pure"));
+        }
+    }
+
+    public sealed class AnswerHintTests
+    {
+        [Test]
+        public void OneBlankPerLetterFollowedByTheCount()
+        {
+            Assert.AreEqual("_____(5)", AnswerHint.Placeholder("apple", Reveal.None));
+        }
+
+        [Test]
+        public void RevealsTheFirstOrTheLastLetter()
+        {
+            Assert.AreEqual("a____(5)", AnswerHint.Placeholder("apple", Reveal.First));
+            Assert.AreEqual("____e(5)", AnswerHint.Placeholder("apple", Reveal.Last));
+            Assert.AreEqual("B________(9)", AnswerHint.Placeholder("Byzantium", Reveal.First));
+            Assert.AreEqual("a(1)", AnswerHint.Placeholder("a", Reveal.Last));
+        }
+
+        [Test]
+        public void ClicksToggleAndNeverShowBothEnds()
+        {
+            Assert.AreEqual(Reveal.First, AnswerHint.Toggle(Reveal.None, Reveal.First));
+            Assert.AreEqual(Reveal.None, AnswerHint.Toggle(Reveal.First, Reveal.First));
+            Assert.AreEqual(Reveal.Last, AnswerHint.Toggle(Reveal.First, Reveal.Last));
+            Assert.AreEqual(Reveal.First, AnswerHint.Toggle(Reveal.Last, Reveal.First));
+            Assert.AreEqual(Reveal.None, AnswerHint.Toggle(Reveal.Last, Reveal.Last));
         }
     }
 }

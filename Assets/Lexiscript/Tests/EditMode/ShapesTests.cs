@@ -35,6 +35,26 @@ namespace Lexiscript
         }
 
         [Test]
+        public void ContainsMatchesTheBeveledOutline()
+        {
+            var outline = Shapes.Octagon(1, 0.3f);
+            Assert.IsTrue(Shapes.Contains(outline, Vector2.zero));
+            Assert.IsTrue(Shapes.Contains(outline, new Vector2(0.95f, 0)));
+            Assert.IsFalse(Shapes.Contains(outline, new Vector2(0.95f, 0.95f)), "斜切掉的角不算在格子裡");
+            Assert.IsFalse(Shapes.Contains(outline, new Vector2(1.1f, 0)));
+        }
+
+        [Test]
+        public void PolygonIsCounterClockwiseAndRegular()
+        {
+            var triangle = Shapes.Polygon(Vector2.zero, 1, 3, 90);
+            Assert.AreEqual(3, triangle.Count);
+            Assert.Greater(Area(triangle), 0);
+            Assert.AreEqual(new Vector2(0, 1).x, triangle[0].x, 1e-5f);
+            Assert.AreEqual(1, triangle[0].y, 1e-5f);
+        }
+
+        [Test]
         public void BevelBandHasUniformWidth()
         {
             const float chamfer = 0.3f, inset = 0.04f;

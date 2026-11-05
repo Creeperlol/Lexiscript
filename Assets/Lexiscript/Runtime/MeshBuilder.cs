@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Lexiscript
 {
@@ -32,6 +33,8 @@ namespace Lexiscript
         public Mesh Apply(Mesh mesh)
         {
             mesh.Clear();
+            // 房間網格含大量裝飾圖形，可能超過 16-bit 索引的 65535 個頂點
+            mesh.indexFormat = vertices.Count > ushort.MaxValue ? IndexFormat.UInt32 : IndexFormat.UInt16;
             mesh.SetVertices(vertices);
             // 用 float 顏色：暗色轉成 linear 後數值很小，8-bit 會出現色階斷層
             mesh.SetColors(colors);

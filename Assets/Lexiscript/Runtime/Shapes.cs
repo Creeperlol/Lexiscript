@@ -52,15 +52,27 @@ namespace Lexiscript
             center + new Vector2(0, radius), center + new Vector2(-radius, 0),
         };
 
-        public static List<Vector2> Circle(Vector2 center, float radius, int segments)
+        /// <summary>正多邊形；邊數夠多就當圓用。degrees 是第一個頂點的角度。</summary>
+        public static List<Vector2> Polygon(Vector2 center, float radius, int sides, float degrees)
         {
             var points = new List<Vector2>();
-            for (int i = 0; i < segments; i++)
+            for (int i = 0; i < sides; i++)
             {
-                float angle = i * 2 * Mathf.PI / segments;
+                float angle = degrees * Mathf.Deg2Rad + i * 2 * Mathf.PI / sides;
                 points.Add(center + radius * new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)));
             }
             return points;
+        }
+
+        /// <summary>點是否在逆時針凸多邊形內（含邊上）。</summary>
+        public static bool Contains(List<Vector2> convexPolygon, Vector2 point)
+        {
+            for (int i = 0; i < convexPolygon.Count; i++)
+            {
+                Vector2 a = convexPolygon[i], b = convexPolygon[(i + 1) % convexPolygon.Count];
+                if ((b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x) < 0) return false;
+            }
+            return true;
         }
 
         /// <summary>從 a 到 b 的粗線段，兩端各延伸半個線寬（方形端點）。</summary>

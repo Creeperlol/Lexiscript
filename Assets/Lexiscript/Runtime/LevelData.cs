@@ -39,19 +39,31 @@ namespace Lexiscript
         BridgePointer,
     }
 
-    /// <summary><see cref="Puzzle"/> 需要的單格資料；答案與提示答案都是大寫 A–Z。</summary>
+    /// <summary>
+    /// <see cref="Puzzle"/> 需要的單格資料。答案與提示答案都是英文字母，
+    /// 保留標準大小寫（一般詞小寫、專有名詞大寫開頭），比對時不分大小寫。
+    /// </summary>
     public sealed class BlockDef
     {
         public readonly string Id;
-        public readonly string[] Answers;
+        /// <summary>唯一的正解；空字串代表這格不能作答。</summary>
+        public readonly string Answer;
         /// <summary>依規則也成立、但不是指定答案的詞；打出來只跳提示，不會解開。</summary>
         public readonly string[] Hints;
 
-        public BlockDef(string id, string[] answers, string[] hints)
+        public BlockDef(string id, string answer, string[] hints)
         {
             Id = id;
-            Answers = answers;
+            Answer = answer;
             Hints = hints;
         }
+    }
+
+    /// <summary>答案欄沒聚焦時要露出答案的哪個字母。</summary>
+    public enum Reveal
+    {
+        None,
+        First,
+        Last,
     }
 }

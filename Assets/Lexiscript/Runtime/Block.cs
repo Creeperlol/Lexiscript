@@ -30,8 +30,10 @@ namespace Lexiscript
 
         public BlockColor color;
         public BlockShape shape;
+        /// <summary>題目字，一般詞小寫、專有名詞大寫開頭。</summary>
         public string clue = "";
-        public string[] answers = new string[0];
+        /// <summary>唯一正解，保留標準大小寫；答對後答案欄會換成這個寫法。</summary>
+        public string answer = "";
         public string[] hintAnswers = new string[0];
         public List<Link> links = new List<Link>();
         public TextMeshPro clueText;
@@ -39,9 +41,9 @@ namespace Lexiscript
 
         Mesh mesh;
 
-        public bool IsPure => string.IsNullOrEmpty(clue) && answers.Length == 0;
+        public bool IsPure => string.IsNullOrEmpty(clue) && string.IsNullOrEmpty(answer);
 
-        public BlockDef ToDef() => new BlockDef(name, Upper(answers), Upper(hintAnswers));
+        public BlockDef ToDef() => new BlockDef(name, answer ?? "", hintAnswers);
 
         /// <summary>依目前欄位與連結目標的位置重畫這格的網格。</summary>
         public void Redraw()
@@ -54,13 +56,25 @@ namespace Lexiscript
                 mesh = new Mesh { hideFlags = HideFlags.DontSave };
                 GetComponent<MeshFilter>().sharedMesh = mesh;
             }
+            // 指向＋連接橋的符號也貼著方塊邊緣畫，不畫在橋的中間
             var pointers = links
-                .Where(link => link.target != null && link.kind == LinkKind.Pointer)
+                .Where(link => link.target != null && link.kind != LinkKind.Bridge)
                 .Select(link => Art.Direction(link.target.transform.position - transform.position));
             var builder = new MeshBuilder();
             Art.Block(builder, color, shape, IsPure, pointers);
             builder.Apply(mesh);
         }
+
+        public bool Contains(Vector2 world) => Shapes.Contains(Art.BlockOutline(shape), Local(world));
+
+        /// <summary>world 在答案那半格（下半）。</summary>
+        public bool InAnswerHalf(Vector2 world) => Local(world).y <= 0;
+
+        /// <summary>world 指在色框上；純色格整格都是色框。</summary>
+        public bool InBand(Vector2 world) =>
+            Contains(world) && (IsPure || !Shapes.Contains(Art.BlockFace(shape), Local(world)));
+
+        Vector2 Local(Vector2 world) => world - (Vector2)transform.position;
 
         void OnDisable()
         {
@@ -71,7 +85,5 @@ namespace Lexiscript
         // Edit 模式的 Update 只在場景變動時才執行，Inspector 改欄位後要自己排一次，Board 才會重畫
         void OnValidate() => UnityEditor.EditorApplication.QueuePlayerLoopUpdate();
 #endif
-
-        static string[] Upper(string[] words) => words.Select(word => word.ToUpperInvariant()).ToArray();
     }
 }
