@@ -212,10 +212,10 @@ namespace Lexiscript
             return spoiler;
         }
 
-        /// <summary>正式關卡排第一，按 Play 或建置後從教學開始。</summary>
+        /// <summary>標題畫面排第一，建置後從標題進入教學。</summary>
         public static void RegisterScenes()
         {
-            var scenes = new[] { GameSetup.ScenePath, DemoSetup.ScenePath }
+            var scenes = new[] { TitleSetup.ScenePath, GameSetup.ScenePath, DemoSetup.ScenePath }
                 .Where(path => AssetDatabase.LoadAssetAtPath<SceneAsset>(path) != null)
                 .Select(path => new EditorBuildSettingsScene(path, true));
             EditorBuildSettings.scenes = scenes.ToArray();
