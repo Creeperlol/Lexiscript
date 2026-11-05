@@ -149,16 +149,21 @@ namespace Lexiscript
 
         public static Player Player(Material material, Vector2 spawn)
         {
-            var mesh = Save(Art.PlayerSquare(), "Player.asset");
-            var go = Visual("Player", null, mesh, material, PlayerOrder);
+            var go = new GameObject("Player");
             go.transform.position = spawn;
             var body = go.AddComponent<Rigidbody2D>();
             // 模板的 2D 重力是 -9.81，俯視角不需要
             body.gravityScale = 0;
             body.freezeRotation = true;
             body.interpolation = RigidbodyInterpolation2D.Interpolate;
-            go.AddComponent<BoxCollider2D>().size = Vector2.one * (2 * Art.PlayerHalf);
-            return go.AddComponent<Player>();
+            // 圓形碰撞體推著方塊角時會順著角滑開，玩家稍微沒對準也能滑進方塊之間的縫
+            go.AddComponent<CircleCollider2D>().radius = Art.PlayerHalf;
+            var player = go.AddComponent<Player>();
+            // 外觀放在錨在碰撞體底部的子物件：轉身擠壓、換外觀都不會改到碰撞體，擠壓時腳也不會離地
+            var avatar = Visual("Avatar", go.transform, null, material, PlayerOrder);
+            avatar.transform.localPosition = new Vector3(0, -Art.PlayerHalf, 0);
+            avatar.AddComponent<PlayerAvatar>();
+            return player;
         }
 
         public static TextMeshPro FloorText(Transform parent, string name, string text, Vector2 position, float width, float fontSize)

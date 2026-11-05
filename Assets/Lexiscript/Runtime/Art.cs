@@ -16,7 +16,8 @@ namespace Lexiscript
         const float HatchPitch = 0.16f, HatchWidth = 0.06f;
         const float DiamondOuter = 0.22f, DiamondInner = 0.185f, ChevronStroke = 0.04f;
         const float BridgeWidth = 0.12f;
-        public const float PlayerHalf = 0.25f;
+        // 方塊之間的縫寬 Pitch − 2 × Half = 0.5；直徑 0.4 的碰撞體扣掉兩側的 contact offset 還有餘裕穿過去
+        public const float PlayerHalf = 0.2f;
         const float PlayerOutline = 0.04f;
 
         public const float CameraSize = 5f;
@@ -239,13 +240,15 @@ namespace Lexiscript
             return Shapes.Clip(polygon, Vector2.down, -rect.yMin);
         }
 
+        /// <summary>原本的白色小方塊外觀，大小跟碰撞體一樣；原點在底邊中央，跟像素小人一樣站在腳底的錨點上。</summary>
         public static Mesh PlayerSquare()
         {
             var mesh = new MeshBuilder();
+            var center = new Vector2(0, PlayerHalf);
             var outer = Vector2.one * PlayerHalf;
             var inner = Vector2.one * (PlayerHalf - PlayerOutline);
-            mesh.Add(Shapes.Rect(-outer, outer), Ink);
-            mesh.Add(Shapes.Rect(-inner, inner), Color.white);
+            mesh.Add(Shapes.Rect(center - outer, center + outer), Ink);
+            mesh.Add(Shapes.Rect(center - inner, center + inner), Color.white);
             return mesh.Apply(new Mesh());
         }
 
