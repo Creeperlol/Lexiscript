@@ -7,7 +7,7 @@ namespace Lexiscript
 {
     /// <summary>
     /// 把鍵盤送到目前的 <see cref="TextFocus"/>。文字走 onTextInput，系統的按鍵連發與輸入法都在裡面；
-    /// 方向鍵這類編輯鍵沒有文字事件，這裡自己做按住連發。
+    /// 方向鍵這類編輯鍵沒有文字事件，這裡自己做按住連發。焦點要輸入法時也每幀確認系統輸入法還開著。
     /// </summary>
     public sealed class TextInputHub : MonoBehaviour
     {
@@ -29,6 +29,9 @@ namespace Lexiscript
         ITextTarget lastTarget;
         bool composing;
         int compositionEndFrame = -10;
+        /// <summary>這次組字期間 Unity 自己記的組字字串（Input.compositionString）有過內容，見 <see cref="TrackNativeComposition"/>。</summary>
+        bool nativeComposed;
+        int nativeEmptyFrames;
 
         void OnEnable()
         {
@@ -46,6 +49,7 @@ namespace Lexiscript
         {
             Bind(Keyboard.current);
             TextFocus.ForgetReleasedKeys();
+            TextFocus.KeepIme();
             if (keyboard != null) PollKeys();
         }
 
@@ -57,6 +61,7 @@ namespace Lexiscript
                 lastTarget = TextFocus.Current;
                 composing = false;
             }
+            TrackNativeComposition();
             bool shift = keyboard.shiftKey.isPressed, ctrl = keyboard.ctrlKey.isPressed;
             foreach (var key in EditKeys) Poll(key, shift, ctrl);
             foreach (var key in ShortcutKeys)
@@ -127,6 +132,32 @@ namespace Lexiscript
         {
             composing = false;
             compositionEndFrame = Time.frameCount;
+        }
+
+        /// <summary>
+        /// 有些輸入法取消組字（Esc、把注音刪光）時不會送空的組字事件（Input System 文件也說不能依賴），
+        /// 不處理的話會一直當作還在組字，擋掉之後的 Backspace、Enter 與方向鍵。Unity 自己也記著組字字串：
+        /// 這次組字它跟著變過，之後清空兩幀（事件可能晚一幀才處理）就當作組字已經取消。
+        /// 它從沒變過（例如測試直接送事件）就不管它，只依事件判斷。
+        /// </summary>
+        void TrackNativeComposition()
+        {
+            if (!composing)
+            {
+                nativeComposed = false;
+                nativeEmptyFrames = 0;
+                return;
+            }
+            if (Input.compositionString.Length > 0)
+            {
+                nativeComposed = true;
+                nativeEmptyFrames = 0;
+            }
+            else if (nativeComposed && ++nativeEmptyFrames >= 2)
+            {
+                EndComposition();
+                TextFocus.Current?.OnComposition("");
+            }
         }
 
         void Bind(Keyboard next)
