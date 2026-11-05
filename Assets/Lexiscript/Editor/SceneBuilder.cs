@@ -57,13 +57,17 @@ namespace Lexiscript
 
         public static void Hud() => new GameObject("Hud", typeof(Hud));
 
-        public static Rooms Rooms(Material material, IList<Rect> floors, IList<Rect> doorways, string meshName, int seed)
+        /// <param name="kinds">與 floors 一一對應的用途；Demo 這種只有一塊地板的場景不用給。</param>
+        /// <param name="plots">大地圖分區與門後房間的地面標記（見 <see cref="Art.Plot"/>）。</param>
+        public static Rooms Rooms(Material material, IList<Rect> floors, IList<Rect> doorways, string meshName, int seed,
+            IList<RoomKind> kinds = null, IList<(Rect area, BlockColor? accent, bool flipped)> plots = null)
         {
-            var mesh = Save(Art.Rooms(floors, doorways, seed), meshName);
+            var mesh = Save(Art.Rooms(floors, doorways, seed, plots), meshName);
             var go = Visual("Rooms", null, mesh, material, RoomOrder);
             var rooms = go.AddComponent<Rooms>();
             rooms.floors = floors.ToArray();
             rooms.doorways = doorways.ToArray();
+            rooms.kinds = kinds?.ToArray() ?? new RoomKind[0];
             foreach (var wall in Walls(floors, doorways))
             {
                 var collider = go.AddComponent<BoxCollider2D>();
@@ -189,6 +193,17 @@ namespace Lexiscript
             door.counter = counter;
             go.SetActive(true);
             return door;
+        }
+
+        /// <summary>蓋住 door 打開前看不到的地板；遮罩在執行時才畫，所以編輯模式看得到裡面。</summary>
+        public static RoomCover Cover(Material material, string name, Rect area, Door door)
+        {
+            var go = Visual(name, null, null, material, Art.CoverOrder);
+            go.transform.position = area.center;
+            var cover = go.AddComponent<RoomCover>();
+            cover.area = area;
+            cover.door = door;
+            return cover;
         }
 
         public static Spoiler Spoiler(Transform parent, Material material, Block block, Vector2 position)
