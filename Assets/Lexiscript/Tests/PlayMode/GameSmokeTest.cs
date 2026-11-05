@@ -212,6 +212,35 @@ namespace Lexiscript
             Assert.Less(Vector2.Distance(inside, body.position), 0.05f, "站在已經打開的門後房間裡，讀檔後回到原位");
         }
 
+        [UnityTest]
+        public IEnumerator ShowAnswerSkipsBlocksStillUnderACover()
+        {
+            yield return LoadGame();
+            var board = Object.FindAnyObjectByType<Board>();
+            var rooms = Object.FindAnyObjectByType<Rooms>();
+            var body = Object.FindAnyObjectByType<Player>().GetComponent<Rigidbody2D>();
+            FinishTutorial(board, rooms);
+            yield return null;
+            var room = rooms.floors[System.Array.IndexOf(rooms.kinds, RoomKind.Gated)];
+            Assert.IsTrue(RoomCover.Hides(room.center));
+
+            // 站進還蓋著的門後房間正中央；關掉物理，免得角色被方塊推開、位置跟算答案時不一樣
+            body.simulated = false;
+            body.transform.position = room.center;
+            Vector2 from = room.center;
+            var nearest = board.Blocks.Where(block => !string.IsNullOrEmpty(block.answer))
+                .OrderBy(block => ((Vector2)block.transform.position - from).sqrMagnitude).ToList();
+            Assert.IsTrue(RoomCover.Hides(nearest[0].transform.position), "測試前提：離得最近的方塊還在遮罩底下");
+            var visible = nearest.First(block => !RoomCover.Hides(block.transform.position));
+
+            input.Type("/");
+            input.Type("showanswer");
+            yield return input.Tap(Key.Enter);
+            var clue = string.IsNullOrEmpty(visible.clue) ? "" : $" ({visible.clue})";
+            Assert.AreEqual($"Answer: {visible.answer}{clue}", Hud.Instance.Chat.Messages.Last(), "只挑看得到的方塊，不能先拿到門後房間的答案");
+            body.simulated = true;
+        }
+
         static IEnumerator LoadGame()
         {
             SceneManager.LoadScene("Game");

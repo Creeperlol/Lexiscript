@@ -16,7 +16,7 @@ namespace Lexiscript
 
         static TMP_FontAsset display;
 
-        /// <summary>找不到候選字型時退回 TMP 預設字型；中文字形一律由 <see cref="Hud.UiFont"/> 補上。</summary>
+        /// <summary>找不到候選字型時改用 <see cref="Hud.UiFont"/>（系統中文字型，連它都沒有才是 TMP 預設字型）；中文字形一律由 Hud.UiFont 補上。</summary>
         public static TMP_FontAsset Display
         {
             get
@@ -36,7 +36,7 @@ namespace Lexiscript
                 font.fallbackFontAssetTable = new List<TMP_FontAsset> { Hud.UiFont };
                 return font;
             }
-            Debug.LogWarning("No display font found, using the TMP default font.");
+            Debug.LogWarning($"No display font found, falling back to {Hud.UiFont.name}.");
             return Hud.UiFont;
         }
     }

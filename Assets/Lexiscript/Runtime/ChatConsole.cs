@@ -221,7 +221,8 @@ namespace Lexiscript
             {
                 Vector2 from = player.transform.position;
                 nearest = board.Blocks
-                    .Where(block => !string.IsNullOrEmpty(block.answer))
+                    // 還沒開門的房間裡的方塊看不到，不能透過指令先拿到答案
+                    .Where(block => !string.IsNullOrEmpty(block.answer) && !RoomCover.Hides(block.transform.position))
                     .OrderBy(block => ((Vector2)block.transform.position - from).sqrMagnitude)
                     .FirstOrDefault();
             }

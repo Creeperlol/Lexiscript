@@ -32,23 +32,11 @@ namespace Lexiscript
             return 1 - Mathf.Pow(1 - t, 5);
         }
 
-        public static float OutExpo(float t)
-        {
-            t = Mathf.Clamp01(t);
-            return t >= 1 ? 1 : 1 - Mathf.Pow(2, -10 * t);
-        }
-
         /// <param name="overshoot">越大回彈越明顯；1.70158 約超出 10%。</param>
         public static float OutBack(float t, float overshoot = 1.70158f)
         {
             t = Mathf.Clamp01(t) - 1;
             return 1 + (overshoot + 1) * t * t * t + overshoot * t * t;
-        }
-
-        public static float InBack(float t, float overshoot = 1.70158f)
-        {
-            t = Mathf.Clamp01(t);
-            return (overshoot + 1) * t * t * t - overshoot * t * t;
         }
 
         /// <summary>0→1→0 的單峰曲線（先快後慢地鼓起再收回），做脈衝、閃光用。</summary>

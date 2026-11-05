@@ -32,6 +32,8 @@ namespace Lexiscript
         public bool Animating => Time.unscaledTime - changedAt < Mathf.Max(InDelay + InSeconds, FlashSeconds);
         /// <summary>整個計數器的不透明度，設定關掉時淡到 0。</summary>
         public float Alpha => group.alpha;
+        /// <summary>顯示中的計數器幾乎不透明，點擊不能穿透到被它擋住的方塊；設定關掉、淡出之後就不擋。</summary>
+        public bool Covers(Vector2 screen) => Alpha > 0.5f && Ui.Contains(rect, screen);
         public TMP_Text Number => current;
 
         void Awake()

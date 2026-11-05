@@ -92,8 +92,9 @@ namespace Lexiscript
             foreach (var width in BarWidths)
             {
                 var bar = Shapes.Rect(new Vector2(x, -BarHeight / 2), new Vector2(x + width, BarHeight / 2));
+                // 無色只畫斜紋、不填底，跟世界裡的無色方塊一樣透出底色；斜紋對齊同一組座標，相鄰直條才連得起來
                 if (colorless)
-                    foreach (var stripe in Hatch(bar)) AddMirrored(stripe, BarColor);
+                    foreach (var stripe in HudStyle.Hatch(bar, HatchPitch, HatchWidth)) AddMirrored(stripe, BarColor);
                 else
                     AddMirrored(bar, BarColor);
                 x += width + BarGap;
@@ -106,20 +107,6 @@ namespace Lexiscript
         {
             left.Add(polygon, color);
             right.Add(polygon.Select(point => new Vector2(-point.x, point.y)).ToList(), color);
-        }
-
-        /// <summary>無色的直條只畫 45° 斜紋、不填底，跟世界裡的無色方塊一樣透出底色。</summary>
-        static IEnumerable<List<Vector2>> Hatch(List<Vector2> bar)
-        {
-            var across = new Vector2(1, -1).normalized;
-            float min = bar.Min(corner => Vector2.Dot(corner, across));
-            float max = bar.Max(corner => Vector2.Dot(corner, across));
-            // 斜紋對齊整組的座標，相鄰直條的斜紋才連得起來
-            for (float offset = Mathf.Floor(min / HatchPitch) * HatchPitch; offset < max; offset += HatchPitch)
-            {
-                var stripe = Shapes.Clip(Shapes.Clip(bar, across, offset + HatchWidth), -across, -offset);
-                if (stripe.Count >= 3) yield return stripe;
-            }
         }
 
         /// <summary>換顏色時直條從兩側往內滑入並淡入。</summary>

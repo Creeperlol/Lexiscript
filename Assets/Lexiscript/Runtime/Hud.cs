@@ -82,7 +82,8 @@ namespace Lexiscript
 
         /// <summary>滑鼠在介面上：世界的點擊、顏色名稱與滾輪縮放都要讓給介面。</summary>
         public static bool IsPointerOverUi(Vector2 screen) =>
-            ModalOpen || (Instance != null && (Instance.Notes.Covers(screen) || Instance.Chat.Covers(screen) || Instance.Settings.Covers(screen)));
+            ModalOpen || (Instance != null && (Instance.Notes.Covers(screen) || Instance.Chat.Covers(screen) || Instance.Settings.Covers(screen)
+                || Instance.Counter.Covers(screen)));
 
         public static bool ConsumesScroll(Vector2 screen) =>
             ModalOpen || (Instance != null && (Instance.Notes.WantsScroll(screen) || Instance.Chat.WantsScroll(screen)));

@@ -70,11 +70,15 @@ namespace Lexiscript
             Assert.IsFalse(counter.Animating, "不是玩家當場解開的變化不播動畫");
             Assert.AreEqual("004", Shown());
 
+            var middle = InputHarness.Screen((RectTransform)counter.transform);
+            Assert.IsTrue(Hud.IsPointerOverUi(middle), "顯示中的計數器擋住後面的世界，點擊不能穿透到看不到的方塊");
+
             GameSettings.ShowSolvedCounter = false;
             yield return null;
             Assert.Greater(counter.Alpha, 0f, "關掉時淡出，不是直接消失");
             yield return new WaitForSeconds(0.4f);
             Assert.AreEqual(0f, counter.Alpha, 1e-3f, "設定關掉時看不到");
+            Assert.IsFalse(Hud.IsPointerOverUi(middle), "關掉之後就不擋點擊");
             GameSettings.ShowSolvedCounter = true;
             yield return new WaitForSeconds(0.45f);
             Assert.AreEqual(1f, counter.Alpha, 1e-3f);
