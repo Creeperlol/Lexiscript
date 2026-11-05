@@ -52,6 +52,10 @@ namespace Lexiscript
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = ReferenceResolution;
             scaler.matchWidthOrHeight = 0.5f;
+            // CanvasScaler 只在 OnEnable 和每幀 Update 套用縮放，剛建立時用的還是預設的 1 倍；
+            // 重新啟用讓它現在就照上面的設定算，不然載入場景的第一幀整個介面都是沒縮放的大小
+            scaler.enabled = false;
+            scaler.enabled = true;
             Root = (RectTransform)canvasObject.transform;
             ColorLabel = Ui.Add<ColorNameLabel>("ColorName", Root);
             Hint = Ui.Add<HintLabel>("Hint", Root);

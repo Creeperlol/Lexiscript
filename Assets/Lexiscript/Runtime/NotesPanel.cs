@@ -55,6 +55,7 @@ namespace Lexiscript
 
         readonly TextEditBuffer buffer = new TextEditBuffer(c => c == '\t' || TextEditBuffer.Printable(c), MaxLength, multiline: true);
         RectTransform rect, toolbar, viewport, content, caret;
+        Canvas canvas;
         GameObject expanded, minimized;
         Image page, caretImage;
         UiShape grip;
@@ -397,9 +398,11 @@ namespace Lexiscript
         /// <summary>整個筆記留在畫面內；畫面比筆記還小時，至少露出左上角，工具列才抓得到。</summary>
         Vector2 Clamp(Vector2 target)
         {
-            var area = ((RectTransform)rect.parent).rect.size;
-            // 還沒排版的 Canvas 可能量到 0，夾了反而會把筆記推到畫面外
-            if (area.x <= 0 || area.y <= 0) return target;
+            // Canvas 自己的 RectTransform 要到畫面更新時才套用 CanvasScaler 的縮放，剛載入場景時量到的還是沒縮放的像素大小，
+            // 筆記會被夾到錯的位置；縮放倍率則是 CanvasScaler 一算完就生效，所以用螢幕大小除以倍率
+            if (canvas == null) canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return target;
+            var area = new Vector2(Screen.width, Screen.height) / canvas.rootCanvas.scaleFactor;
             float x = Mathf.Max(Mathf.Min(target.x, 0), ExpandedSize.x - area.x);
             float y = Mathf.Min(Mathf.Max(target.y, 0), area.y - ExpandedSize.y);
             return new Vector2(x, y);
