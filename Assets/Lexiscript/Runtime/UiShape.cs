@@ -9,6 +9,8 @@ namespace Lexiscript
     /// 畫齒輪、箭頭、條碼線、斜紋這類平面設計的圖形。後加的蓋在前面。
     /// 頂點色會乘上 <see cref="Graphic.color"/>，整組淡入淡出只要改 color.a。
     /// </summary>
+    // uGUI 的 Graphic 本身不帶 CanvasRenderer（Image、Text 各自宣告），自訂的 Graphic 沒宣告就畫不出來
+    [RequireComponent(typeof(CanvasRenderer))]
     public sealed class UiShape : MaskableGraphic
     {
         readonly List<List<Vector2>> polygons = new List<List<Vector2>>();
