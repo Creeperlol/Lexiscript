@@ -58,7 +58,9 @@ namespace Lexiscript
             body.position = target;
             yield return new WaitForFixedUpdate();
             yield return null;
-            for (float until = Time.time + 2; RoomCover.Hides(first.transform.position) && Time.time < until;) yield return null;
+            // 遮罩從門那一側斜著擦開，三格不是同時露出來
+            bool Covered() => new[] { first, last, late }.Any(block => RoomCover.Hides(block.transform.position));
+            for (float until = Time.time + 2; Covered() && Time.time < until;) yield return null;
             yield return input.Click(first, answerHalf: false);
             yield return input.Click(last, answerHalf: false, MouseButton.Right);
             Assert.AreEqual(Reveal.First, board.RevealOf(first));

@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Lexiscript/Title.unity
+    guid: f7b1590045e48b54f9286bdcb058bcd4
+  - enabled: 1
     path: Assets/Lexiscript/Game.unity
     guid: 36335074566136b4a908b1148b21059a
   - enabled: 1
