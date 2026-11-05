@@ -9,7 +9,14 @@ namespace Lexiscript
         /// <summary>以原點為中心的正方形；chamfer 大於 0 時四角切成斜角。</summary>
         public static List<Vector2> Octagon(float half, float chamfer)
         {
-            if (chamfer <= 0) return Rect(new Vector2(-half, -half), new Vector2(half, half));
+            // 網格從第一個頂點扇形展開。正方形從角展開的話內部那條邊是 45° 對角線，開 MSAA 時鏡頭停在某些次像素位置，
+            // 這條邊上會漏出斷斷續續的細縫；從底邊中點開始，內部的邊就不是 45°
+            if (chamfer <= 0)
+                return new List<Vector2>
+                {
+                    new Vector2(0, -half), new Vector2(half, -half), new Vector2(half, half),
+                    new Vector2(-half, half), new Vector2(-half, -half),
+                };
             float h = half, c = chamfer;
             return new List<Vector2>
             {
