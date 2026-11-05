@@ -152,7 +152,7 @@ namespace Lexiscript
                 return;
             }
             Vector2 world = view.ScreenToWorldPoint(screen);
-            var block = Blocks.FirstOrDefault(candidate => Puzzle.IsAnswerable(candidate.name) && candidate.Contains(world));
+            var block = RoomCover.Hides(world) ? null : Blocks.FirstOrDefault(candidate => Puzzle.IsAnswerable(candidate.name) && candidate.Contains(world));
             if (block == null)
             {
                 Unfocus();
@@ -204,7 +204,8 @@ namespace Lexiscript
             return Mathf.Clamp(TMP_TextUtilities.GetCursorIndexFromPosition(text, screen, Camera.main), 0, field.Length);
         }
 
-        void Focus(Block block)
+        /// <summary>聚焦到這格的答案欄（等同點它的下半部）。</summary>
+        public void Focus(Block block)
         {
             Unfocus();
             Focused = block;

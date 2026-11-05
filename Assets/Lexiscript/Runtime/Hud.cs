@@ -61,15 +61,22 @@ namespace Lexiscript
 
         void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance != this) return;
+            Instance = null;
+            ModalOpen = false;
         }
+
+        /// <summary>
+        /// 設定這類蓋住整個畫面的視窗開著：滑鼠點哪裡都算點在介面上，筆記等其他介面也不處理點擊。
+        /// </summary>
+        public static bool ModalOpen { get; set; }
 
         /// <summary>滑鼠在介面上：世界的點擊、顏色名稱與滾輪縮放都要讓給介面。</summary>
         public static bool IsPointerOverUi(Vector2 screen) =>
-            Instance != null && (Instance.Notes.Covers(screen) || Instance.Chat.Covers(screen));
+            ModalOpen || (Instance != null && (Instance.Notes.Covers(screen) || Instance.Chat.Covers(screen)));
 
         public static bool ConsumesScroll(Vector2 screen) =>
-            Instance != null && (Instance.Notes.WantsScroll(screen) || Instance.Chat.WantsScroll(screen));
+            ModalOpen || (Instance != null && (Instance.Notes.WantsScroll(screen) || Instance.Chat.WantsScroll(screen)));
 
         static TMP_FontAsset LoadUiFont()
         {
@@ -99,6 +106,14 @@ namespace Lexiscript
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
             return (RectTransform)go.transform;
+        }
+
+        /// <summary>畫平面圖形用的 <see cref="UiShape"/>；介面的點擊都自己判斷，所以不接收 raycast。</summary>
+        public static UiShape Shape(string name, Transform parent)
+        {
+            var shape = Add<UiShape>(name, parent);
+            shape.raycastTarget = false;
+            return shape;
         }
 
         public static Image Image(string name, Transform parent, Color color)

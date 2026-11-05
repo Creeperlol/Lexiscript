@@ -27,6 +27,10 @@ namespace Lexiscript
 
         public bool IsSolved(string id) => solved.Contains(id);
 
+        public int SolvedCount => solved.Count;
+
+        public IEnumerable<string> SolvedIds => solved;
+
         /// <summary>目前輸入，保留玩家打的大小寫；解開後是答案的標準大小寫。</summary>
         public string Input(string id) => inputs[id];
 

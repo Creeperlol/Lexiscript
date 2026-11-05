@@ -19,6 +19,7 @@ namespace Lexiscript
         public TextMeshPro label;
 
         Mesh mesh;
+        TMP_FontAsset englishFont;
 
         public bool Revealed { get; private set; }
 
@@ -29,11 +30,14 @@ namespace Lexiscript
                 mesh = new Mesh { hideFlags = HideFlags.DontSave };
                 GetComponent<MeshFilter>().sharedMesh = mesh;
             }
+            if (label != null && englishFont == null) englishFont = label.font;
+            if (Application.isPlaying) GameSettings.Changed += Paint;
             Paint();
         }
 
         void OnDisable()
         {
+            GameSettings.Changed -= Paint;
             if (mesh != null) DestroyImmediate(mesh);
         }
 
@@ -44,8 +48,9 @@ namespace Lexiscript
             var view = Camera.main;
             if (mouse == null || view == null || !mouse.leftButton.wasPressedThisFrame) return;
             Vector2 screen = mouse.position.ReadValue();
-            if (Hud.IsPointerOverUi(screen)) return;
-            Vector2 local = (Vector2)view.ScreenToWorldPoint(screen) - (Vector2)transform.position;
+            Vector2 world = view.ScreenToWorldPoint(screen);
+            if (Hud.IsPointerOverUi(screen) || RoomCover.Hides(world)) return;
+            Vector2 local = world - (Vector2)transform.position;
             if (Mathf.Abs(local.x) <= Size.x / 2 && Mathf.Abs(local.y) <= Size.y / 2) Reveal();
         }
 
@@ -61,7 +66,14 @@ namespace Lexiscript
             Art.Panel(builder, Size, Revealed ? Art.SpoilerOpen : Art.SpoilerBar);
             builder.Apply(mesh);
             if (label == null) return;
-            label.text = Revealed && block != null ? block.answer : Prompt;
+            if (Revealed && block != null)
+            {
+                if (englishFont != null) label.font = englishFont;
+                label.text = block.answer;
+            }
+            // 編輯模式維持英文：場景存檔與編輯模式的測試都以英文為準
+            else if (Application.isPlaying && englishFont != null) Localization.Apply(label, Prompt, englishFont);
+            else label.text = Prompt;
             label.color = Revealed ? Art.Ink : Art.Paper;
         }
     }

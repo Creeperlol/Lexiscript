@@ -11,8 +11,8 @@ namespace Lexiscript
     static class SceneBuilder
     {
         public const string Folder = "Assets/Lexiscript/";
-        const int RoomOrder = -20, FloorTextOrder = -15, DoorOrder = -12, BridgeOrder = -10, BlockOrder = 0;
-        const int BlockTextOrder = Art.SelectionOrder + 1, SpoilerOrder = 3, PlayerOrder = 10;
+        const int RoomOrder = Art.RoomOrder, FloorTextOrder = Art.FloorTextOrder, DoorOrder = Art.DoorOrder, BridgeOrder = Art.BridgeOrder, BlockOrder = Art.BlockOrder;
+        const int BlockTextOrder = Art.BlockTextOrder, SpoilerOrder = Art.SpoilerOrder, PlayerOrder = Art.PlayerOrder;
 
         /// <summary>已存在就沿用，換掉資產會改變 GUID，讓其他場景的參照斷掉。</summary>
         public static Material Material()
@@ -167,6 +167,7 @@ namespace Lexiscript
             label.text = text;
             label.fontSize = fontSize;
             label.color = Art.FloorInk;
+            label.gameObject.AddComponent<LocalizedText>().english = text;
             return label;
         }
 

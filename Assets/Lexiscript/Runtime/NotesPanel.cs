@@ -249,6 +249,7 @@ namespace Lexiscript
 
         void HandleMouse(Mouse mouse)
         {
+            if (Hud.ModalOpen) return;
             Vector2 screen = mouse.position.ReadValue();
             if (dragging)
             {
@@ -683,6 +684,27 @@ namespace Lexiscript
         }
 
         void ScheduleSave() => saveAt = Time.unscaledTime + SaveDelay;
+
+        /// <summary>重置進度用：清空筆記、刪掉存檔，而且之後（包括場景卸載時）不會再存回去。</summary>
+        public void Discard()
+        {
+            buffer.Reset("");
+            saveAt = float.PositiveInfinity;
+            DeleteSave();
+        }
+
+        /// <summary>刪掉筆記存檔；場景裡有筆記時改用 <see cref="Discard"/>，否則它卸載時會把內容存回去。</summary>
+        public static void DeleteSave()
+        {
+            try
+            {
+                if (File.Exists(FilePath)) File.Delete(FilePath);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Could not delete notes at {FilePath}: {exception.Message}");
+            }
+        }
 
         void Load()
         {

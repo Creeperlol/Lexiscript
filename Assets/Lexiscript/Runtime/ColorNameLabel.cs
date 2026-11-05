@@ -48,7 +48,8 @@ namespace Lexiscript
             var view = Camera.main;
             if (board == null || board.Blocks == null || mouse == null || view == null) return null;
             Vector2 screen = mouse.position.ReadValue();
-            return Hud.IsPointerOverUi(screen) ? null : board.BandAt(view.ScreenToWorldPoint(screen));
+            Vector2 world = view.ScreenToWorldPoint(screen);
+            return Hud.IsPointerOverUi(screen) || RoomCover.Hides(world) ? null : board.BandAt(world);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Lexiscript
     sealed class InputHarness
     {
         InputSettings savedSettings, testSettings;
-        string notesPath;
+        string notesPath, settingsPath, progressPath;
         public Keyboard Keyboard { get; private set; }
         public Mouse Mouse { get; private set; }
         Vector2 pointer;
@@ -33,6 +33,13 @@ namespace Lexiscript
             notesPath = Path.Combine(Path.GetTempPath(), "lexiscript-test-notes.json");
             File.Delete(notesPath);
             NotesPanel.StoragePath = notesPath;
+            settingsPath = Path.Combine(Path.GetTempPath(), "lexiscript-test-settings.json");
+            File.Delete(settingsPath);
+            GameSettings.StoragePath = settingsPath;
+            GameSettings.Reload();
+            progressPath = Path.Combine(Path.GetTempPath(), "lexiscript-test-progress.json");
+            File.Delete(progressPath);
+            GameProgress.StoragePath = progressPath;
         }
 
         public IEnumerator TearDown()
@@ -47,9 +54,16 @@ namespace Lexiscript
             TextClipboard.UseSystem = true;
             NotesPanel.StoragePath = null;
             File.Delete(notesPath);
+            GameSettings.StoragePath = null;
+            File.Delete(settingsPath);
+            GameSettings.Reload();
+            GameProgress.StoragePath = null;
+            File.Delete(progressPath);
         }
 
         public string NotesPath => notesPath;
+        public string SettingsPath => settingsPath;
+        public string ProgressPath => progressPath;
 
         public static Vector2 Screen(Vector2 world) => Camera.main.WorldToScreenPoint(world);
 

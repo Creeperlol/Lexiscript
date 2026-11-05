@@ -53,6 +53,10 @@ namespace Lexiscript
         /// <summary>答案欄選取底色畫在方塊（0）之上、方塊文字（2）之下。</summary>
         public const int SelectionOrder = 1;
 
+        /// <summary>世界物件的 sortingOrder，數字大的蓋在上面。房間遮罩蓋住房間裡的一切，角色永遠在最上層。</summary>
+        public const int RoomOrder = -20, FloorTextOrder = -15, DoorOrder = -12, BridgeOrder = -10, BlockOrder = 0;
+        public const int BlockTextOrder = SelectionOrder + 1, SpoilerOrder = 3, EffectOrder = 6, CoverOrder = 20, PlayerOrder = 50;
+
         // 跟地板只差幾個百分點的亮度，看得出圖形但不會干擾方塊顏色與文字
         static readonly Color[] Decor = { Hex(0xD4D8DE), Hex(0xE4E6EA), Hex(0xD8DBE1), Hex(0xE1E3E8) };
 
