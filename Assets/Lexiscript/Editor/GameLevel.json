@@ -333,32 +333,408 @@
         ]
       },
       {
-        "key": "demo", "accent": "RoseRed", "placeholder": true,
+        "key": "red", "accent": "RoseRed",
         "groups": [
           {
-            "caption": "", "links": [ { "from": "PH_BIRD", "to": "PH_SPARROW", "kind": "Bridge" } ],
+            "caption": "", "links": [ { "from": "RR_FRUIT_W", "to": "RR_BANANA", "kind": "Bridge" }, { "from": "RR_BANANA_W", "to": "RR_FRUIT", "kind": "Bridge" } ],
             "blocks": [
-              { "id": "PH_BIRD", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "bird", "answer": "bird", "hints": [], "why": "暫時的示範內容（placeholder，正式題目合併時會移除）。白色方角＝原字照寫 bird，連接橋分享 bird。" },
-              { "id": "PH_SPARROW", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "sparrow", "answer": "bird", "hints": ["animal", "songbird"], "why": "暫時的示範內容。與 bird 連接；sparrow 往上一層的類別是 bird → 推出玫瑰紅方角＝上位詞。" }
+              { "id": "RR_FRUIT_W", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "fruit", "answer": "fruit", "hints": [], "why": "白色方角＝原字照寫 fruit，玩家一定解得出來，連接橋把 fruit 交給右邊的紅色方角。" },
+              { "id": "RR_BANANA", "dx": 1, "dy": 1, "color": "RoseRed", "shape": "Plain", "clue": "banana", "answer": "fruit", "hints": ["food", "plant", "produce", "berry"], "why": "紅色方角第一次出現：連接橋說答案是 fruit，玩家看出 banana → fruit 是「往上找類別」。5 個字母的上位詞還有 plant、berry（植物學分類），但 fruit 最直覺，連接橋與首字母 f 都能鎖定；food、plant、produce、berry 列為提示答案。" },
+              { "id": "RR_BANANA_W", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "banana", "answer": "banana", "hints": [], "why": "白色方角＝原字照寫 banana，連接橋把 banana 交給右邊的紅色切角。" },
+              { "id": "RR_FRUIT", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Beveled", "clue": "fruit", "answer": "banana", "hints": ["apple", "orange", "grape", "lemon", "mango", "peach", "pear", "plum", "kiwi", "melon", "cherry", "strawberry", "blueberry", "watermelon", "pineapple", "guava", "papaya", "lychee", "coconut", "lime", "berry", "tomato", "avocado", "apricot", "fig", "date", "tangerine", "mandarin", "durian", "longan", "litchi", "pomelo", "persimmon", "starfruit", "dragonfruit", "raspberry", "blackberry", "cranberry", "nectarine", "pomegranate", "cantaloupe"], "why": "紅色切角第一次出現：連接橋說答案是 banana，玩家看出 fruit → banana 是「往下找成員」。和正上方 banana → fruit 同一對字、方向相反，只差形狀，讓玩家發現切角把方向倒過來。6 個字母的水果還有 orange、cherry、papaya、lychee、tomato，完全靠連接橋鎖定 banana；常見水果（含台灣常見的 guava、longan、pomelo、durian 等）都列為提示答案。grapefruit 以提示答案 grape 開頭，不列。" }
             ]
           },
           {
-            "caption": "", "links": [ { "from": "PH_FRUIT", "to": "PH_BANANA", "kind": "Bridge" } ],
+            "caption": "", "links": [ { "from": "RR_WORD", "to": "RR_DUCK", "kind": "Bridge" } ],
             "blocks": [
-              { "id": "PH_FRUIT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "fruit", "answer": "fruit", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 fruit，連接橋往下分享 fruit。" },
-              { "id": "PH_BANANA", "dx": 0, "dy": -1, "color": "RoseRed", "shape": "Plain", "clue": "banana", "answer": "fruit", "hints": ["food", "plant"], "why": "暫時的示範內容。與 fruit 連接（直向的連接橋）；banana 的上位詞是 fruit。" }
+              { "id": "RR_WORD", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Beveled", "clue": "word", "answer": "bird", "hints": ["heard", "herd", "third", "nerd", "curd", "stirred", "absurd", "preferred", "occurred", "blurred", "gird", "purred", "spurred", "referred"], "why": "灰色切角＝押韻：word → bird（兩字母音相同）。4 個字母的押韻字還有 herd、nerd、curd、gird，但 bird 是國中生最熟的一個，也可以免費顯示首字母 b 鎖定，再加上連接橋（duck 的類別），一定解得出來；其他押韻字列為提示答案。lord、cord、sword 只是拼法像、唸法不押韻，不列。" },
+              { "id": "RR_DUCK", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "duck", "answer": "bird", "hints": ["animal", "fowl", "poultry", "waterfowl", "food", "meat", "creature"], "why": "紅色方角第二個示範：duck → bird（往上找類別），而且和押韻的 word 連接，兩條規則交會在 bird。4 個字母的類別還有 fowl（冷僻）以及把鴨當食物的 food、meat，靠連接橋與首字母 b 鎖定 bird；animal、poultry、waterfowl、creature 等也列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "RR_NET", "to": "RR_NUMBER", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "RR_NET", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "net", "answer": "ten", "hints": [], "why": "黑色方角＝倒過來寫：n-e-t → t-e-n，答案唯一、一定解得出來，連接橋把 ten 交給右邊的紅色切角。（原本是灰色 ate → eight，但深紫區已有 eight → ate 同一對同音字，改用倒寫避免跨區重複。）" },
+              { "id": "RR_NUMBER", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Beveled", "clue": "number", "answer": "ten", "hints": ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "eleven", "twelve", "thirteen", "fifteen", "twenty", "thirty", "forty", "fifty", "hundred", "thousand", "million", "billion", "dozen", "odd", "even", "prime"], "why": "紅色切角第二個示範：number → ten（往下找成員）。3 個字母的數字還有 one、two、six，完全靠連接橋（net 倒寫）鎖定 ten；其他數字，以及 odd、even、prime（奇數、偶數、質數）列為提示答案。fourteen、sixteen、seventeen、eighteen、nineteen、sixty、seventy、eighty、ninety 以提示答案 four、six、seven、eight、nine 開頭，不列；tenth 是序數而且以答案 ten 開頭，也不列。" }
             ]
           },
           {
             "caption": "", "links": [],
             "blocks": [
-              { "id": "PH_TIGER", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "tiger", "answer": "animal", "hints": ["cat", "mammal", "beast", "creature", "predator"], "why": "暫時的示範內容。玫瑰紅方角＝上位詞：tiger → animal；cat、mammal 等也是 tiger 的類別，列為提示答案。" }
+              { "id": "RR_JANUARY", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "January", "answer": "month", "hints": [], "why": "練習（沒有連接橋）：紅色方角往上找類別，January → month，答案唯一（5 個字母）。winter 雖然常和 January 一起想到，但 January 是冬天的一部分、不是「一種冬天」，不列。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "RR_DEAR", "to": "RR_DEER", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "RR_DEAR", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "dear", "answer": "deer", "hints": [], "why": "灰色方角＝同音異字：dear 和 deer 唸法相同，4 個字母唯一，箭頭把 deer 傳給右邊。（原本是 meet → meat，但深紫區已有 meat → meet 同一對同音字，改掉避免跨區重複。）" },
+              { "id": "RR_DEER", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "", "answer": "animal", "hints": ["mammal", "creature", "beast"], "why": "練習（箭頭鏈）：箭頭帶來 deer，紅色方角往上找類別 → animal。6 個字母的還有 mammal（哺乳類），但國中生最直覺的是 animal，首字母 a 可鎖定；mammal、creature、beast 列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "RR_PINK", "to": "RR_COLOR", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "RR_PINK", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "pink", "answer": "color", "hints": ["colour", "shade", "hue", "tint"], "why": "練習：紅色方角往上，pink → color。shade 也是 5 個字母，但 color 是最直覺的答案，首字母 c 可鎖定；英式拼法 colour 列為提示答案（color 不是 colour 的開頭，第 5 個字母不同）。箭頭把 color 往右傳。" },
+              { "id": "RR_COLOR", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Beveled", "clue": "", "answer": "red", "hints": ["blue", "green", "yellow", "black", "white", "pink", "purple", "orange", "brown", "gray", "grey", "gold", "silver", "tan", "violet", "navy", "beige", "cyan", "indigo", "crimson", "scarlet", "maroon", "magenta", "khaki", "ivory", "teal"], "why": "練習：箭頭帶來 color，紅色切角往下找成員 → red。常見顏色裡只有 red 是 3 個字母（tan 很少用），其他顏色（含 tan）都列為提示答案。pink → color → red 先往上再往下，同時練習兩種形狀；也呼應這一區是紅色。" }
             ]
           },
           {
             "caption": "", "links": [],
             "blocks": [
-              { "id": "PH_RED", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "red", "answer": "color", "hints": ["colour", "shade", "hue"], "why": "暫時的示範內容。玫瑰紅方角＝上位詞：red → color；英式拼法 colour 與 shade、hue 列為提示答案（color 不是 colour 的開頭）。" }
+              { "id": "RR_MEAL", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Beveled", "clue": "meal", "answer": "lunch", "hints": ["breakfast", "dinner", "supper", "brunch", "snack", "feast", "picnic", "buffet"], "why": "練習（沒有連接橋）：紅色切角往下找成員，meal → lunch。三餐裡只有 lunch 是 5 個字母；snack、feast 雖然也是 5 個字母但不是三餐，列為提示答案，首字母 l 可鎖定；breakfast、dinner、supper、brunch、picnic、buffet 也列為提示答案。luncheon 以答案 lunch 開頭，不列。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "RR_JUICE", "to": "RR_THINK", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "RR_JUICE", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "juice", "answer": "drink", "hints": ["beverage", "liquid", "fluid"], "why": "收尾：紅色方角往上，juice → drink。5 個字母的類別還有 fluid，但國中生不熟，首字母 d 與連接橋都能鎖定；beverage、liquid、fluid 列為提示答案。fruit 雖然也是 5 個字母，但果汁不是一種水果（不是類別關係），不列。" },
+              { "id": "RR_THINK", "dx": 1, "dy": 0, "color": "LightGray", "shape": "Beveled", "clue": "think", "answer": "drink", "hints": ["pink", "sink", "link", "ink", "wink", "blink", "rink", "stink", "shrink", "brink", "mink", "zinc", "clink", "kink", "slink"], "why": "灰色切角＝押韻：think → drink。押韻字很多，靠連接橋（juice 的類別）鎖定 drink：兩格顏色、題目都不同，經過各自的規則得到同一個字。其他押韻字列為提示答案。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "green", "accent": "EmeraldGreen",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "EG_TIGER_W", "to": "EG_LION", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "EG_TIGER_W", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "tiger", "answer": "tiger", "hints": [], "why": "白色方角＝原字照寫 tiger，連接橋把 tiger 交給右邊的綠色方角。" },
+              { "id": "EG_LION", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Plain", "clue": "lion", "answer": "tiger", "hints": ["bear", "wolf", "cat", "dog", "fox", "zebra", "horse", "sheep", "mouse", "monkey", "elephant", "leopard", "cheetah", "panther", "giraffe", "cow", "pig", "rabbit", "deer", "jaguar", "puma", "hyena", "panda", "camel", "koala", "whale", "snake", "rhino"], "why": "綠色方角第一次出現：連接橋說答案是 tiger，玩家看出 lion → tiger 是「同一類的另一個成員」（都是大貓、都是動物）。lion 和 tiger 不同音、不押韻、拼法也不像，不會跟白黑灰的規則混淆。其他動物列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_KNOWS", "to": "EG_MOUTH", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "EG_KNOWS", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "knows", "answer": "nose", "hints": ["noes"], "why": "灰色方角＝同音異字：knows 的 k 不發音，和 nose 唸法相同，4 個字母一定解得出來（罕用的 noes 也同音，列為提示答案）。連接橋把 nose 交給右邊的綠色方角。（原本是灰色切角 green → queen，但 5 個字母的押韻字 clean、scene 比 queen 更常見，已知規則那格解不唯一，所以改成同音字。）" },
+              { "id": "EG_MOUTH", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Plain", "clue": "mouth", "answer": "nose", "hints": ["eyes", "ears", "lips", "chin", "cheek", "tongue", "tooth", "teeth", "hair", "face", "head", "neck", "hand", "foot", "arms", "legs", "knee", "finger", "toes", "nail", "skin"], "why": "綠色方角第二個示範：mouth → nose（同一類：臉上的部位）。和第一組 lion → tiger（動物）不同類別，玩家可以確認規則是「同一類的另一個成員」而不只是「動物」；mouth 和 nose 不同音、不押韻、也不是近義或反義，不會和白黑灰的規則混淆（原本的 king → queen 容易被看成「男女相對」的反義）。4 個字母的身體部位還有 eyes、ears、lips、chin、hair、face、head、neck、hand、foot、knee、nail、skin 等，靠連接橋鎖定 nose；其他部位都列為提示答案。eye／eyes 這類單複數只能收一個（一個是另一個的開頭），答案欄顯示 4 個字母，所以收 4 個字母的複數 eyes、ears、lips、arms、legs、toes。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_CREAM_W", "to": "EG_ICE", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "EG_CREAM_W", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "cream", "answer": "cream", "hints": [], "why": "白色方角＝原字照寫 cream，連接橋把 cream 交給右邊的綠色切角。" },
+              { "id": "EG_ICE", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Beveled", "clue": "ice", "answer": "cream", "hints": ["cubes", "age", "tea", "water", "hockey", "skating", "pack", "box", "skate", "candy", "coffee", "pop", "rink", "bucket", "bag", "storm"], "why": "綠色切角第一次出現：連接橋說答案是 cream，玩家看出 ice → cream 是「常接在後面的字」（ice cream）。5 個字母的搭配還有 water（冰水）、cubes、skate、candy、storm，靠連接橋與首字母 c 鎖定 cream；這些和 age、tea、coffee、hockey、skating、rink、pop、pack、box、bag、bucket 都列為提示答案。cube 和 cubes 只能收一個，答案欄顯示 5 個字母，所以收 cubes。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_POTS", "to": "EG_BUS", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "EG_POTS", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "pots", "answer": "stop", "hints": [], "why": "黑色方角＝倒過來寫：p-o-t-s → s-t-o-p，答案唯一，連接橋把 stop 交給右邊。" },
+              { "id": "EG_BUS", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Beveled", "clue": "bus", "answer": "stop", "hints": ["station", "driver", "ride", "fare", "lane", "ticket", "route", "line", "seat", "pass", "trip", "tour", "card", "terminal", "schedule"], "why": "綠色切角第二個示範：bus → stop（bus stop）。4 個字母的搭配還有 ride、fare、lane、line、seat、pass、trip、tour、card，靠連接橋（pots 倒寫）鎖定 stop；這些和 station、driver、ticket、route、terminal、schedule 都列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "EG_JUNE", "dx": 0, "dy": 0, "color": "EmeraldGreen", "shape": "Plain", "clue": "June", "answer": "July", "hints": ["January", "February", "March", "April", "May", "August", "September", "October", "November", "December"], "why": "練習（沒有連接橋）：綠色方角找同類，June → July。月份裡只有 June、July 是 4 個字母，字數直接鎖定；其他月份列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "EG_UNCLE", "dx": 0, "dy": 0, "color": "EmeraldGreen", "shape": "Plain", "clue": "uncle", "answer": "aunt", "hints": ["father", "mother", "dad", "mom", "papa", "mama", "brother", "sister", "cousin", "nephew", "niece", "son", "daughter", "grandpa", "grandma", "parent", "wife", "husband", "twin", "grandfather", "grandmother"], "why": "練習（沒有連接橋）：綠色方角找同類（親戚），uncle → aunt。4 個字母的家人稱謂還有兒語 papa、mama 和 wife、twin，但和 uncle 最直覺成對的是 aunt，首字母 a 可鎖定；其他親戚稱謂列為提示答案。auntie 以答案 aunt 開頭、grandparent 以提示答案 grandpa 開頭，不列。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_GLAD", "to": "EG_HAPPY", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "EG_GLAD", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Beveled", "clue": "glad", "answer": "happy", "hints": ["merry", "jolly", "joyful", "cheerful", "cheery", "pleased", "delighted", "content"], "why": "白色切角＝近義詞：glad → happy，國中生最直覺的近義字；merry、jolly 同為 5 個字母，列為提示答案，首字母 h 可鎖定。箭頭把 happy 往右傳。（原本是黑色切角 sad → happy，但天青區已有一模一樣的 sad → happy，改用近義詞；也讓這區兩條箭頭鏈一條近義、一條反義。）" },
+              { "id": "EG_HAPPY", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Beveled", "clue": "", "answer": "birthday", "hints": ["hour", "ending", "face", "day", "life", "family", "holidays", "new", "anniversary", "Easter", "Halloween", "Christmas", "Thanksgiving"], "why": "練習（箭頭鏈）：箭頭帶來 happy，綠色切角接常一起出現的字 → birthday（Happy birthday）。8 個字母的還有 holidays，但 birthday 最直覺，首字母 b 可鎖定；hour、ending、new（Happy New Year）、anniversary、Christmas 等節日也列為提示答案。holiday 是 holidays 的開頭，只能收一個：答案欄顯示 8 個字母，玩家會打 holidays，所以收 holidays。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_DAY", "to": "EG_NIGHT", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "EG_DAY", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "day", "answer": "night", "hints": ["dark", "evening"], "why": "黑色切角＝反義詞：day → night，5 個字母只有 night；dark、evening 列為提示答案（nighttime 以答案 night 開頭，不列）。箭頭把 night 往右傳。" },
+              { "id": "EG_NIGHT", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Beveled", "clue": "", "answer": "market", "hints": ["club", "life", "owl", "sky", "time", "shift", "school", "light", "vision", "flight", "view", "class", "train", "bus", "guard", "out"], "why": "練習（箭頭鏈）：箭頭帶來 night，綠色切角 → market（夜市）。6 個字母的還有 school、vision、flight（night school／night vision／night flight），但台灣玩家最直覺的是夜市，首字母 m 可鎖定；這些和 club、life、sky、time、shift、light、view、class、train 等都列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "EG_COFFEE", "to": "EG_MILK", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "EG_COFFEE", "dx": 0, "dy": 0, "color": "EmeraldGreen", "shape": "Plain", "clue": "coffee", "answer": "tea", "hints": ["milk", "juice", "water", "soda", "cola", "cocoa", "beer", "wine", "pop", "coke", "lemonade", "smoothie"], "why": "收尾：綠色方角找同類（飲料），coffee → tea。3 個字母的常見飲料只有 tea（pop 指汽水，列為提示答案）；milk、juice、water、soda、cola、coke、cocoa 等也列為提示答案。" },
+              { "id": "EG_MILK", "dx": 1, "dy": 0, "color": "EmeraldGreen", "shape": "Beveled", "clue": "milk", "answer": "tea", "hints": ["shake", "bottle", "powder", "carton", "chocolate", "tooth", "teeth", "cow", "man", "jug"], "why": "綠色切角接常一起出現的字：milk → tea（奶茶）。3 個字母的搭配還有 cow（milk cow，中文「乳牛」直翻，台灣玩家可能會打）、man、jug，但奶茶最直覺，首字母 t 與連接橋都能鎖定；連接橋讓兩種綠色規則交會在同一個答案：coffee 的同類、milk 的搭配都是 tea。shake、bottle、tooth 等也列為提示答案。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "purple", "accent": "DeepPurple",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "DP_WENT", "to": "DP_GO", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "DP_WENT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "went", "answer": "went", "hints": [], "why": "白色方角＝原字照寫：went → went，玩家一定解得出來。連接橋把 went 分享給右邊的深紫方角 go，是深紫方角（過去式）的第一個示範。" },
+              { "id": "DP_GO", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "go", "answer": "went", "hints": ["gone"], "why": "深紫方角第一次出現：與左邊白色 went 連接、答案相同 → 玩家從國中必背的 go → went 看出深紫方角＝過去式。用不規則動詞開場，go 和 went 沒有共同字母，不會被誤會成加字母、換字母或同音。過去分詞 gone 也是 4 個字母，列為提示答案（打了會提示換一個）；連接橋和首字母 w 都能鎖定 went。goes、going 不是過去式，不收。Demo 已有 stress → stressed，這區刻意不重複。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "DP_ONE", "to": "DP_WIN", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "DP_ONE", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "one", "answer": "won", "hints": [], "why": "灰色方角＝同音異字：one 和 won 唸法相同，3 個字母的同音字只有 won，答案唯一。連接橋把 won 分享給右邊的深紫方角 win，是過去式的第二個示範。" },
+              { "id": "DP_WIN", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "win", "answer": "won", "hints": [], "why": "與左邊 one 的答案 won 連接：win → won，再次印證深紫方角＝過去式。兩格顏色、題目都不同，一個靠聲音、一個靠過去式，卻得到同一個 won。win 的過去式和過去分詞都是 won，答案唯一，沒有提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "DP_SWIMMING", "to": "DP_SWIM_CUT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "DP_SWIM", "dx": 0, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "swim", "answer": "swam", "hints": ["swum"], "why": "不靠連接橋的第一個過去式練習：swim → swam。過去分詞 swum 也是 4 個字母、首尾字母都一樣，列為提示答案（打了會提示換一個）；題目要的是過去式，最直覺的就是 swam。刻意和右邊同題目的深紫切角 swim 並排：先解學過的方角，再對照切角。" },
+              { "id": "DP_SWIM_CUT", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Beveled", "clue": "swim", "answer": "swimming", "hints": [], "why": "深紫切角第一次出現：與右邊白色 swimming 連接、答案相同。同一個 swim，左邊方角得到 swam、這格切角得到 swimming，只差形狀 → 推出深紫切角＝進行式（-ing）。swim 要重複 m 再加 ing，看得出這是動詞的 -ing 形，不只是在後面加字母。答案唯一，沒有提示答案。Demo 已有 run → running，這區刻意不重複。" },
+              { "id": "DP_SWIMMING", "dx": 2, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "swimming", "answer": "swimming", "hints": [], "why": "白色方角＝原字照寫：swimming → swimming，一定解得出來；連接橋把 swimming 分享給左邊的深紫切角 swim。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "DP_GOING", "to": "DP_COME", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "DP_GOING", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "going", "answer": "coming", "hints": ["come", "staying", "stopping", "arriving", "returning"], "why": "黑色切角＝反義詞：going（去）→ coming（來），come／go 是國中最常見的一對反義字，6 個字母只有 coming。staying、stopping、arriving、returning 也說得通但字數不同，和原形 come 一起列為提示答案；stay、stop 會是 staying、stopping 的開頭，所以不收原形。連接橋把 coming 分享給右邊的深紫切角 come。" },
+              { "id": "DP_COME", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Beveled", "clue": "come", "answer": "coming", "hints": [], "why": "與左邊 going 的答案 coming 連接：come → coming，深紫切角＝進行式的第二個示範。come 要先去掉 e 再加 ing，再次說明這是動詞的 -ing 形；題目 going 本身也是 -ing 形，兩邊互相印證。答案唯一，沒有提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "DP_WHERE", "to": "DP_WORE", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "DP_WHERE", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "where", "answer": "wear", "hints": ["ware"], "why": "灰色方角＝同音異字：where 和 wear（穿）唸法相同，4 個字母最直覺的就是 wear。罕用的 ware（商品）也同音，列為提示答案，尾字母 r 可鎖定；而且箭頭下一格要把它變成過去式，只有動詞 wear 接得下去。箭頭把 wear 往右傳。" },
+              { "id": "DP_WORE", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "", "answer": "wore", "hints": ["worn"], "why": "箭頭帶來 wear；深紫方角＝過去式：wear → wore。過去分詞 worn 也是 4 個字母，列為提示答案；過去式最直覺的是 wore，尾字母 e 也能鎖定。不靠連接橋的過去式練習：先用教過的灰色，再套新規則。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "DP_CRY", "dx": 0, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "cry", "answer": "cried", "hints": [], "why": "不靠連結的過去式練習：cry → cried（y 改 i 再加 ed），5 個字母，答案唯一。前面的過去式都是不規則動詞，這題補一個規則變化，讓玩家知道深紫方角不只管不規則動詞。拼錯的 cryed 不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "DP_LIE", "dx": 0, "dy": 0, "color": "DeepPurple", "shape": "Beveled", "clue": "lie", "answer": "lying", "hints": [], "why": "不靠連結的進行式練習：lie → lying（ie 改成 y 再加 ing），國中文法常考的拼法。字數 (5) 擋掉拼錯的 lieing（6），答案唯一；不論 lie 是說謊還是躺下，-ing 形都是 lying。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "DP_STAND", "to": "DP_SAT", "kind": "Pointer" }, { "from": "DP_STAND", "to": "DP_SITTING", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "DP_STAND", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "stand", "answer": "sit", "hints": ["lie", "fall"], "why": "黑色切角＝反義詞：stand（站）→ sit（坐），3 個字母最直覺的就是 sit。lie（躺）也是 3 個字母，和 fall 一起列為提示答案，首字母 s 可鎖定；下面切角格是 7 個字母，也只有 sitting 接得上（lie 會變成 5 個字母的 lying）。箭頭把 sit 同時傳給右邊的深紫方角和下面的深紫切角。" },
+              { "id": "DP_SAT", "dx": 1, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "", "answer": "sat", "hints": [], "why": "箭頭帶來 sit；深紫方角＝過去式：sit → sat，過去式和過去分詞都是 sat，答案唯一。" },
+              { "id": "DP_SITTING", "dx": 0, "dy": -1, "color": "DeepPurple", "shape": "Beveled", "clue": "", "answer": "sitting", "hints": [], "why": "箭頭帶來 sit；深紫切角＝進行式：sit → sitting（重複 t 再加 ing），答案唯一。同一個 sit 往右是過去式、往下是進行式，不靠連接橋同時練習兩種形狀，當這區的收尾。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "magenta", "accent": "Magenta",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "MG_FEET", "to": "MG_FOOT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "MG_FEET", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "feet", "answer": "feet", "hints": [], "why": "白色方角＝原字照寫：feet → feet，一定解得出來。連接橋把 feet 分享給右邊的洋紅方角 foot，是洋紅方角（單數轉複數）的第一個示範。" },
+              { "id": "MG_FOOT", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Plain", "clue": "foot", "answer": "feet", "hints": [], "why": "洋紅方角第一次出現：與左邊白色 feet 連接、答案相同 → foot（一隻腳）變 feet（兩隻腳），推出洋紅方角＝單數轉複數。用不規則複數開場，不會被誤會成加字母；oo 變 ee 也不是只換一個字母。foot 的複數只有 feet，答案唯一。Demo 已有 mouse → mice，這區刻意不重複。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_ADULTS", "to": "MG_CHILD", "kind": "Bridge" }, { "from": "MG_NOUN", "to": "MG_CHILD_CUT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "MG_ADULTS", "dx": 0, "dy": 1, "color": "PureBlack", "shape": "Beveled", "clue": "adults", "answer": "children", "hints": ["kids", "minors", "youngsters", "juveniles", "teenagers", "teens", "youths"], "why": "黑色切角＝反義詞：adults（大人）→ children（小孩），8 個字母只有 children。kids、minors、youngsters、juveniles、teenagers、teens、youths 也可以當大人的反義詞，但字數都不同，列為提示答案（teens 和 teenagers 互不為開頭，可以並存）。單數的 child 是 children 的開頭、kid 是 kids 的開頭，打到一半就會先跳提示，所以刻意不收。連接橋把 children 分享給下面的洋紅方角 child。" },
+              { "id": "MG_CHILD", "dx": 0, "dy": 0, "color": "Magenta", "shape": "Plain", "clue": "child", "answer": "children", "hints": [], "why": "與上面 adults 的答案 children 連接：child → children，洋紅方角的第二個示範。兩格顏色、題目都不同，經過各自的規則得到同一個 children。child 的複數只有 children，答案唯一；拼錯的 childs 不收。" },
+              { "id": "MG_CHILD_CUT", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "child", "answer": "noun", "hints": [], "why": "洋紅切角第一次出現：與右邊白色 noun 連接、答案相同。同一個 child，左邊方角得到 children、這格切角得到 noun，只差形狀 → 推出洋紅切角＝寫出這個字的詞性（child 是名詞 noun）。child 只當名詞用，答案唯一。" },
+              { "id": "MG_NOUN", "dx": 2, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "noun", "answer": "noun", "hints": [], "why": "白色方角＝原字照寫：noun（名詞）→ noun，一定解得出來；連接橋把 noun 分享給左邊的洋紅切角 child，讓玩家直接看到詞性名稱怎麼拼。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_VERB", "to": "MG_EAT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "MG_VERB", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "verb", "answer": "verb", "hints": [], "why": "白色方角＝原字照寫：verb（動詞）→ verb，一定解得出來；連接橋把 verb 分享給右邊的洋紅切角 eat，示範第二個詞性名稱。" },
+              { "id": "MG_EAT", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "eat", "answer": "verb", "hints": [], "why": "與左邊 verb 連接：eat 是動詞 → verb，洋紅切角的第二個示範。和上一組 child → noun 對照，玩家確定答案是「詞性」而不是別的分類。eat 只當動詞用，答案唯一。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_ADJECTIVE", "to": "MG_HUNGRY", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "MG_ADJECTIVE", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "adjective", "answer": "adjective", "hints": [], "why": "白色方角＝原字照寫：adjective（形容詞）→ adjective。adjective 是比較難拼的字，所以先放在白色格讓玩家直接看到、照抄，再用連接橋分享給右邊的洋紅切角 hungry。" },
+              { "id": "MG_HUNGRY", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "hungry", "answer": "adjective", "hints": [], "why": "與左邊 adjective 連接：hungry（餓的）是形容詞 → adjective，洋紅切角的第三個示範。hungry 只當形容詞用，答案唯一。Demo 已有 quickly → adverb，這區刻意不重複；adjective 的練習放在 chains 房間（new → adjective）。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_FLOW", "to": "MG_WOLVES", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "MG_FLOW", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "flow", "answer": "wolf", "hints": [], "why": "黑色方角＝倒過來寫：f-l-o-w → w-o-l-f（狼），答案唯一；就算不認識 flow，照字母倒過來也解得出來。箭頭把 wolf 往右傳。" },
+              { "id": "MG_WOLVES", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Plain", "clue": "", "answer": "wolves", "hints": [], "why": "箭頭帶來 wolf；洋紅方角＝單數轉複數：wolf → wolves（f 改成 ves），6 個字母，答案唯一。不靠連接橋的複數練習，先倒寫才拿得到題目；拼錯的 wolfs 不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_BEE", "to": "MG_BE", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "MG_BEE", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "bee", "answer": "be", "hints": [], "why": "灰色方角＝同音異字：bee（蜜蜂）和 be 唸法相同，2 個字母只有 be，答案唯一。箭頭把 be 往右傳。" },
+              { "id": "MG_BE", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "", "answer": "verb", "hints": [], "why": "箭頭帶來的是 be、不是 bee：be 是動詞 → verb。如果直接拿 bee（名詞）來想，會打成 noun，所以要先解灰色格才答得對，是不靠連接橋的詞性練習。be 只當動詞，答案唯一；noun 是錯的，不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "MG_TOOTH", "to": "MG_TEETH", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "MG_TOOTH", "dx": 0, "dy": 0, "color": "Magenta", "shape": "Plain", "clue": "tooth", "answer": "teeth", "hints": [], "why": "不靠連接橋的複數練習：tooth → teeth（oo 變 ee，和開頭示範的 foot → feet 同一種變法），5 個字母，答案唯一。箭頭把 teeth 往右傳。" },
+              { "id": "MG_TEETH", "dx": 1, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "", "answer": "noun", "hints": [], "why": "箭頭帶來 teeth；洋紅切角＝詞性：teeth 是名詞 → noun，答案唯一。同一條鏈先後用到洋紅的兩種形狀（方角變複數、切角寫詞性），當這區的收尾。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "cyan", "accent": "SkyCyan",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "SC_CHOOSE", "to": "SC_CHOICE", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SC_CHOOSE", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "choose", "answer": "choose", "hints": [], "why": "白色方角＝原字照寫：choose → choose，玩家一定解得出來。連接橋把 choose 分享給右邊的天青方角 choice，是天青方角（名詞 ↔ 動詞）的第一個示範。" },
+              { "id": "SC_CHOICE", "dx": 1, "dy": 0, "color": "SkyCyan", "shape": "Plain", "clue": "choice", "answer": "choose", "hints": [], "why": "與左邊 choose 連接、答案相同 → 玩家從 choice（名詞：選擇）→ choose（動詞：選擇）看出天青方角＝名詞和動詞互換。choice 只當名詞，它的動詞只有 choose，方向和答案都唯一。兩字差兩個字母、字母組成也不同，不像換字母、重新排列或增減字母，也不押韻。過去式 chose、chosen 不是原形動詞，pick、select 意思相近但不是同一個字族，都刻意不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_SPEECH", "to": "SC_SPEAK", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SC_SPEECH", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "speech", "answer": "speech", "hints": [], "why": "白色方角＝原字照寫：speech → speech，連接橋把 speech 分享給下面的天青方角 speak，是天青方角的第二個示範。" },
+              { "id": "SC_SPEAK", "dx": 0, "dy": 0, "color": "SkyCyan", "shape": "Plain", "clue": "speak", "answer": "speech", "hints": ["speaker", "speaking"], "why": "與上面 speech 連接 → speak（動詞：說）→ speech（名詞：演講、說話）。第一組是名詞 → 動詞，這組反過來是動詞 → 名詞，讓玩家看出天青方角是雙向互換。speech 裡沒有 a、k，不是 speak 加減字母，也不押韻。speaker（說話的人、喇叭）、speaking 也是 speak 的名詞，分別是 7、8 個字母，列為提示答案；6 個字母的只有 speech。talk 意思相近但不是同字族，不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_SALE", "to": "SC_BUY", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "SC_SALE", "dx": 0, "dy": 0, "color": "SkyCyan", "shape": "Plain", "clue": "sale", "answer": "sell", "hints": ["sold"], "why": "不靠連接橋的第一個練習。天青方角＝名詞 ↔ 動詞：sale（拍賣、on sale）只當名詞，它的動詞是 sell（4），方向和答案都唯一，沒有其他同字族的動詞。sell 的過去式 sold 同樣 4 個字母、同樣 s 開頭，玩家可能聯想到「sold out」而打出來，列為提示答案（跳提示叫玩家換原形）；尾字母 l／d 也能分辨。箭頭把 sell 交給右邊。" },
+              { "id": "SC_BUY", "dx": 1, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "", "answer": "buy", "hints": ["purchase"], "why": "箭頭帶來 sell；黑色切角＝反義詞 → buy（3），最直覺、也是唯一 3 個字母的反義詞。purchase 意思一樣，列為提示答案。sale → sell → buy：先用新規則，再接回教學教過的黑色切角。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_STRENGTH", "to": "SC_STRONG", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SC_STRENGTH", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "strength", "answer": "strength", "hints": [], "why": "白色方角＝原字照寫：strength → strength，連接橋把 strength 分享給右邊的天青切角 strong，是天青切角（形容詞 ↔ 名詞）的第一個示範。" },
+              { "id": "SC_STRONG", "dx": 1, "dy": 0, "color": "SkyCyan", "shape": "Beveled", "clue": "strong", "answer": "strength", "hints": [], "why": "與左邊 strength 連接 → strong（形容詞：強壯的）→ strength（名詞：力量），推出天青切角＝形容詞和名詞互換；方角換的是動詞，形狀一變規則就變。strength 不是 strong 單純加字母（o 變成 e），也不押韻。strong 的名詞只有 strength，沒有提示答案；power 意思相近但不是同字族，不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_BEAUTIFUL", "to": "SC_BEAUTY", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SC_BEAUTIFUL", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "beautiful", "answer": "beautiful", "hints": [], "why": "白色方角＝原字照寫：beautiful → beautiful，連接橋把答案分享給下面的天青切角 beauty，是天青切角的第二個示範。" },
+              { "id": "SC_BEAUTY", "dx": 0, "dy": 0, "color": "SkyCyan", "shape": "Beveled", "clue": "beauty", "answer": "beautiful", "hints": ["beauteous"], "why": "與上面 beautiful 連接 → beauty（名詞：美）→ beautiful（形容詞：美麗的），示範天青切角也能從名詞變成形容詞（上一組是形容詞 → 名詞）。beautiful 裡沒有 y，不是 beauty 單純加字母。少見的 beauteous 也是 beauty 的形容詞（同樣 9 個字母），列為提示答案，靠連接橋鎖定 beautiful；pretty 意思相近但不是同字族，不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_PIECE", "to": "SC_PEACEFUL", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "SC_PIECE", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "piece", "answer": "peace", "hints": [], "why": "淺灰方角＝同音異字：piece（一片）唸起來和 peace（和平，5）一樣，是最常見的同音字之一；常見的同音字只有 peace，答案唯一，沒有提示答案（古字 pease 沒有人會打，不收）。箭頭把 peace 交給右邊的天青切角。這區另外兩條練習鏈（sale → sell → buy、life → live → die）都接黑色反義詞，這裡改接教學教過的淺灰同音字，混搭的已知規則才不會單調。" },
+              { "id": "SC_PEACEFUL", "dx": 1, "dy": 0, "color": "SkyCyan", "shape": "Beveled", "clue": "", "answer": "peaceful", "hints": ["peaceable"], "why": "箭頭帶來 peace；天青切角＝名詞 → 形容詞：peaceful（和平的，8），答案唯一。這格沒有題目也沒有連接橋，題目要先用教過的淺灰同音字從 piece 推出 peace，是天青切角的第一個練習，方向是名詞 → 形容詞。少見的 peaceable 也是 peace 的形容詞（9 個字母），列為提示答案；pacific 不是同字族，不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SC_LIFE", "to": "SC_DIE", "kind": "Pointer" }, { "from": "SC_DIE", "to": "SC_DEATH", "kind": "Pointer" }, { "from": "SC_DEAD", "to": "SC_DEATH", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SC_LIFE", "dx": 0, "dy": 0, "color": "SkyCyan", "shape": "Plain", "clue": "life", "answer": "live", "hints": [], "why": "收尾鏈的起點，天青方角練習：life（生命）只當名詞，它的動詞是 live（4），方向和答案都唯一。alive 是形容詞（那是切角的規則），刻意不收。箭頭把 live 交給右邊。" },
+              { "id": "SC_DIE", "dx": 1, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "", "answer": "die", "hints": ["dead"], "why": "箭頭帶來 live；黑色切角＝反義詞 → die（3）。把 live 當形容詞（活的）的話反義是 dead，列為提示答案；3 個字母只有 die。教學房間的黑色方角 live → evil 是倒寫，這格是切角，同一個 live 改取反義，形狀一變答案就變。箭頭把 die 交給右邊。" },
+              { "id": "SC_DEATH", "dx": 2, "dy": 0, "color": "SkyCyan", "shape": "Plain", "clue": "", "answer": "death", "hints": ["dying"], "why": "箭頭帶來 die；天青方角＝動詞 → 名詞：death（5）。dying 也是 5 個字母、可以當名詞，列為提示答案，靠尾字母 h 或下面的連接橋排除。dead 是形容詞不是名詞，不收。life → live → die → death，一條鏈走完一生。" },
+              { "id": "SC_DEAD", "dx": 2, "dy": -1, "color": "SkyCyan", "shape": "Beveled", "clue": "dead", "answer": "death", "hints": ["deadness"], "why": "收尾的「啊哈」：天青切角＝形容詞 → 名詞：dead → death（5），答案唯一。和上面鏈尾的 death 連接：同樣是天青，方角從動詞 die 得到 death，切角從形容詞 dead 也得到 death，兩種形狀的差別一次看清楚。少見的 deadness 也是 dead 的名詞，列為提示答案；die 是動詞，不收。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "golden", "accent": "GoldenBrown",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "GB_KITTEN", "to": "GB_CAT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_KITTEN", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "kitten", "answer": "kitten", "hints": [], "why": "白色方角＝原字照寫：kitten → kitten，連接橋把 kitten 分享給右邊的金棕方角 cat，是金棕方角（現在 → 以前的樣子）的第一個示範。" },
+              { "id": "GB_CAT", "dx": 1, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "cat", "answer": "kitten", "hints": ["kitty"], "why": "與 kitten 連接 → cat（貓）以前是 kitten（小貓）。只看這組玩家可能以為是「小時候」，下一組 ice → water 會把規則擴大成「以前的樣子」。kitty 也是小貓（5 個字母），列為提示答案；kit 是 kitten 和 kitty 的開頭（打到 kit 就會先觸發），不收。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_WATER", "to": "GB_ICE", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_WATER", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "water", "answer": "water", "hints": [], "why": "白色方角＝原字照寫：water → water，連接橋把 water 分享給下面的金棕方角 ice，是金棕方角的第二個示範。" },
+              { "id": "GB_ICE", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "ice", "answer": "water", "hints": [], "why": "與 water 連接 → ice（冰）結冰以前是 water（水）。冰沒有「小時候」，玩家會把規則修正成：金棕方角＝這個東西「以前的樣子」。ice 和 water 不押韻、不同音、拼法完全不像，不會被看成別的規則；有連接橋，答案直接鎖定。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "GB_CHEESE", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "cheese", "answer": "milk", "hints": ["cream", "curd"], "why": "不靠連結的第一個練習：cheese（起司）以前是 milk（牛奶，4），國小就學過的字，最直覺的答案。cream、curd（凝乳）也是做成起司以前的樣子，列為提示答案；curd 同樣 4 個字母但很冷僻，首字母 m 可以鎖定。curds 以 curd 開頭，只收 curd。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_WOOD", "to": "GB_SEED", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "GB_WOOD", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "wood", "answer": "tree", "hints": ["seed", "sapling", "sprout", "plant", "branch", "trunk"], "why": "練習（箭頭鏈）：wood（木頭）以前是 tree（樹，4），最直覺的答案。更早的 seed（種子）也是 4 個字母，列為提示答案（打了會跳出提示）；而且下一格要從這格的答案再往前推一步，這格若是 seed 就推不下去，所以答案是 tree；首字母 t／尾字母 e 也能和 seed 分開。sapling（樹苗）、sprout、plant，以及木頭砍下來以前的 branch（樹枝）、trunk（樹幹）也列為提示答案。箭頭把 tree 交給右邊。" },
+              { "id": "GB_SEED", "dx": 1, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "", "answer": "seed", "hints": ["sapling", "sprout", "plant", "acorn", "nut"], "why": "箭頭帶來 tree；樹以前是 seed（種子，4），答案唯一。sapling、sprout、plant、acorn、nut 也說得通，列為提示答案；seedling 以答案 seed 開頭，不能列。wood → tree → seed，一路往回推。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_MAN", "to": "GB_GIRL", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_MAN", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Plain", "clue": "man", "answer": "boy", "hints": ["kid", "lad", "child", "baby", "teen", "youth", "infant", "toddler"], "why": "金棕方角：man（男人）以前是 boy（男孩，3），最直覺的答案。3 個字母還有 kid、lad，靠右邊的連接橋鎖定：黑色切角 girl 的反義詞也是 boy。child、baby、teen 等更早的樣子都列為提示答案；teenager 以 teen 開頭，只收 teen。" },
+              { "id": "GB_GIRL", "dx": 1, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "girl", "answer": "boy", "hints": ["lad"], "why": "黑色切角＝反義詞：girl → boy（3），最直覺的一對。和左邊 man → boy 連接：兩格不同顏色、不同題目，經過各自的規則得到同一個 boy。lad 也是男孩，列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_THOU", "to": "GB_YOU", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_THOU", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "thou", "answer": "thou", "hints": [], "why": "白色方角＝原字照寫：thou → thou。thou 是較難的古英文，所以先放在白色格讓玩家直接看到、照抄，再用連接橋分享給右邊的金棕切角 you。" },
+              { "id": "GB_YOU", "dx": 1, "dy": 0, "color": "GoldenBrown", "shape": "Beveled", "clue": "you", "answer": "thou", "hints": ["thee", "ye"], "why": "與 thou 連接 → you 的古英文是 thou，推出金棕切角＝這個字「以前（古時候）的說法」，和金棕方角「以前的樣子」同一個主題，所以排在方角的題目之後。thee（受格的你）、ye（你們）也是 you 的古英文，列為提示答案；連接橋鎖定 thou。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_THY", "to": "GB_YOUR", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_THY", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "thy", "answer": "thy", "hints": [], "why": "白色方角＝原字照寫：thy → thy，同樣先讓玩家直接看到古英文，連接橋分享給下面的金棕切角 your。" },
+              { "id": "GB_YOUR", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Beveled", "clue": "your", "answer": "thy", "hints": ["thine"], "why": "與 thy 連接 → your 的古英文是 thy，金棕切角的第二個示範，也替下一題 yourself 鋪路。thine 也是 your 的古英文（用在母音前），列為提示答案；連接橋鎖定 thy。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "GB_YOURSELF", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Beveled", "clue": "yourself", "answer": "thyself", "hints": ["thee"], "why": "不靠連結的練習：yourself＝your＋self，上一組剛學過 your → thy，所以是 thyself（7，Know thyself），答案唯一，不用另外認識新的古英文。古英文的 thee 也能當反身用（sit thee down），列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "GB_HAS", "to": "GB_MATH", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "GB_HAS", "dx": 0, "dy": 0, "color": "GoldenBrown", "shape": "Beveled", "clue": "has", "answer": "hath", "hints": ["hast"], "why": "金棕切角練習：has 的古英文是 hath（4）。hath 沒有用白色格示範，改用右邊的淺灰切角鎖定：和 math 押韻的 4 個字母字有 bath、path、hath，開頭和 has 一樣是 h 的只有 hath（也可以點題目看首字母）；前面學過的 thou、thy、thyself 都有 th，has 把 s 換成 th 也剛好得到 hath。hast 是 have 的古英文（thou hast），玩家可能猜到，列為提示答案。" },
+              { "id": "GB_MATH", "dx": 1, "dy": 0, "color": "LightGray", "shape": "Beveled", "clue": "math", "answer": "hath", "hints": ["bath", "path", "wrath", "lath", "aftermath", "footpath", "warpath", "birdbath", "bloodbath"], "why": "淺灰切角＝押韻：math → hath。只看這格會先想到 bath、path，列為提示答案（打了會跳出提示），答案靠左邊 has 的連接橋鎖定，和教學 blue → new 靠連接橋鎖定是同一種設計；不認識 hath 的玩家，點題目看首字母 h，再照 math、bath、path 的 _ath 拼法也能拼出 hath。選 math 不選 bath、path，是因為英式發音的 bath、path 母音和 hath 不同，math 英美發音都和 hath 押韻。wrath、lath，以及 aftermath、footpath、warpath、birdbath、bloodbath 這些較長的押韻字也列為提示答案（教學的押韻格也收了很多提示）。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "orange", "accent": "SunsetOrange",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "SO_SUN", "to": "SO_SUNSET", "kind": "Pointer" }, { "from": "SO_SET", "to": "SO_SUNSET", "kind": "Pointer" }, { "from": "SO_SUNSET_W", "to": "SO_SUNSET", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SO_SUN", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "sun", "answer": "sun", "hints": [], "why": "白色方角＝原字照寫：sun → sun，一定解得出來。箭頭把 sun 交給右邊的橘色格；它在橘色格的左邊，所以是複合字的前半。" },
+              { "id": "SO_SUNSET", "dx": 1, "dy": 0, "color": "SunsetOrange", "shape": "Plain", "clue": "", "answer": "sunset", "hints": [], "why": "夕陽橘方角第一次出現（示範一，橫的）：沒有題目，左右兩個箭頭帶來 sun 和 set，下方連接橋接到純白方角 sunset、答案相同 → 玩家看出「左邊的字＋右邊的字＝複合字」：sun + set → sunset。滑鼠指到色框會顯示 SunsetOrange，名稱裡剛好就有 sunset，是個小彩蛋。兩個來源和連接橋那格都是白色方角，第一個示範只讓玩家專心看「組字」。sunsets 以 sunset 開頭，不列為提示答案。" },
+              { "id": "SO_SET", "dx": 2, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "set", "answer": "set", "hints": [], "why": "白色方角＝原字照寫：set → set。箭頭把 set 交給左邊的橘色格；它在橘色格的右邊，所以是複合字的後半。" },
+              { "id": "SO_SUNSET_W", "dx": 1, "dy": -1, "color": "PureWhite", "shape": "Plain", "clue": "sunset", "answer": "sunset", "hints": [], "why": "白色方角＝原字照寫 sunset，連接橋把答案 sunset 分享給上方的橘色格，讓玩家從 sun、set → sunset 推出夕陽橘方角＝把兩個字接成一個複合字。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SO_BAD", "to": "SO_GOODBYE", "kind": "Pointer" }, { "from": "SO_BUY", "to": "SO_GOODBYE", "kind": "Pointer" }, { "from": "SO_GOODBYE_W", "to": "SO_GOODBYE", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "SO_BAD", "dx": 0, "dy": 1, "color": "PureBlack", "shape": "Beveled", "clue": "bad", "answer": "good", "hints": ["nice", "fine", "great", "well", "kind", "excellent", "perfect", "wonderful", "awesome"], "why": "黑色切角＝反義詞：bad → good，最直覺的反義詞。nice、fine、well、kind 也是 4 個字母，連同 great、excellent、perfect、wonderful、awesome 列為提示答案；首字母 g 和下方橘色格接到 goodbye 的連接橋都能鎖定 good。箭頭把 good 往下交給橘色格；它在上面，所以是複合字的前半。" },
+              { "id": "SO_GOODBYE", "dx": 0, "dy": 0, "color": "SunsetOrange", "shape": "Plain", "clue": "", "answer": "goodbye", "hints": [], "why": "夕陽橘方角示範二（直的）：上面的箭頭帶來 good、下面帶來 bye，右邊連接橋接到純白方角 goodbye → 印證上下排列時也是照位置「上→下」組字：good + bye → goodbye。這次兩個來源都要先套黑、灰規則才拿得到，提醒玩家箭頭傳的是來源格的答案、不是題目（bad + buy 組不出字）。goodby 是 goodbye 的開頭，不列為提示答案。" },
+              { "id": "SO_BUY", "dx": 0, "dy": -1, "color": "LightGray", "shape": "Plain", "clue": "buy", "answer": "bye", "hints": [], "why": "灰色方角＝同音異字：buy → bye。buy 的同音字有 by 和 bye，字數 (3) 鎖定 bye；by 是 bye 的開頭，不能列為提示答案。箭頭把 bye 往上交給橘色格；它在下面，所以是複合字的後半。" },
+              { "id": "SO_GOODBYE_W", "dx": 1, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "goodbye", "answer": "goodbye", "hints": [], "why": "白色方角＝原字照寫 goodbye，連接橋把答案分享給左邊的橘色格，玩家再回頭對照上下兩格的 good、bye。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SO_WEAK", "to": "SO_WEEKEND", "kind": "Pointer" }, { "from": "SO_FINISH", "to": "SO_WEEKEND", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "SO_WEAK", "dx": 0, "dy": 1, "color": "LightGray", "shape": "Plain", "clue": "weak", "answer": "week", "hints": [], "why": "灰色方角＝同音異字：weak → week，唯一的同音字（國中常考的一對）。箭頭把 week 往下交給橘色格，是複合字的前半。" },
+              { "id": "SO_WEEKEND", "dx": 0, "dy": 0, "color": "SunsetOrange", "shape": "Plain", "clue": "", "answer": "weekend", "hints": [], "why": "第一題不靠連接橋的複合字練習：上面 week、下面 end → weekend（週末）。兩個來源都唯一，組起來的答案也唯一；順序反過來的 endweek 不是英文字。" },
+              { "id": "SO_FINISH", "dx": 0, "dy": -1, "color": "PureWhite", "shape": "Beveled", "clue": "finish", "answer": "end", "hints": ["stop", "complete", "close", "conclude", "done", "halt", "cease", "terminate", "accomplish"], "why": "白色切角＝近義詞：finish → end。3 個字母的近義詞只有 end，字數直接鎖定；stop、complete、close、conclude、done、halt、cease、terminate、accomplish 列為提示答案；ending 以 end 開頭，不能列。箭頭把 end 往上交給橘色格，是複合字的後半。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "SO_TWO", "to": "SO_TODAY", "kind": "Pointer" }, { "from": "SO_NIGHT", "to": "SO_TODAY", "kind": "Pointer" }, { "from": "SO_NIGHT", "to": "SO_DAYTIME", "kind": "Pointer" }, { "from": "SO_EMIT", "to": "SO_DAYTIME", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "SO_TWO", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "two", "answer": "to", "hints": [], "why": "灰色方角＝同音異字：two → to。two 的同音字有 to 和 too，字數 (2) 鎖定 to；too 以 to 開頭，不能列為提示答案。箭頭把 to 交給右邊的橘色格，是複合字的前半。" },
+              { "id": "SO_TODAY", "dx": 1, "dy": 0, "color": "SunsetOrange", "shape": "Plain", "clue": "", "answer": "today", "hints": [], "why": "練習鏈的左半：左邊 to＋右邊 day → today。右邊的 day 同時也是另一個橘色格的來源；對這格來說它在右邊，所以是後半。" },
+              { "id": "SO_NIGHT", "dx": 2, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "night", "answer": "day", "hints": ["morning"], "why": "黑色切角＝反義詞：night → day，3 個字母的只有 day；morning 列為提示答案；daytime、daylight 以 day 開頭，不能列。這格往左、往右各指一個箭頭：對左邊的橘色格它是後半（to + day），對右邊的橘色格它是前半（day + time），同一個字在兩個複合字裡位置不同，是本區的「啊哈」點。" },
+              { "id": "SO_DAYTIME", "dx": 3, "dy": 0, "color": "SunsetOrange", "shape": "Plain", "clue": "", "answer": "daytime", "hints": [], "why": "練習鏈的右半：左邊 day＋右邊 time → daytime（白天）。就算沒背過 daytime，照位置把 day、time 接起來也拼得出答案；不會有其他組法。" },
+              { "id": "SO_EMIT", "dx": 4, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "emit", "answer": "time", "hints": [], "why": "黑色方角＝倒過來寫：e-m-i-t → t-i-m-e，答案唯一。emit 本身不是常見字，但倒寫只看字母，得到的 time 是國中常見字。箭頭把 time 交給左邊的橘色格，是複合字的後半。" }
             ]
           }
         ]
@@ -366,26 +742,91 @@
     ],
     "rooms": [
       {
-        "key": "demo-room", "accent": "Colorless", "placeholder": true,
+        "key": "chains", "accent": "",
         "gate": {
           "links": [],
           "blocks": [
-            { "id": "PH_GATE", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "flow", "answer": "wolf", "hints": [], "why": "暫時的示範內容（門前題目）。黑色方角＝倒過來寫：f-l-o-w → w-o-l-f，解開就開門。" }
+            { "id": "GT_CHAINS", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "lead", "answer": "follow", "hints": ["trail", "lag"], "why": "門前題目，只用教學教過的黑色切角＝反義詞：lead（帶領）→ follow（跟隨），6 個字母最直覺的就是 follow。trail、lag 也有「跟在後面」的意思，列為提示答案；follower 以 follow 開頭，不能列。follow 暗示房間主題：沿著箭頭一格跟著一格，答案一路傳下去。" }
           ]
         },
         "groups": [
           {
-            "caption": "", "links": [ { "from": "PH_STRESSED", "to": "PH_DESSERTS", "kind": "Pointer" } ],
+            "caption": "", "links": [ { "from": "CH_PEEL", "to": "CH_SLEEP", "kind": "Pointer" }, { "from": "CH_SLEEP", "to": "CH_SLEPT", "kind": "Pointer" }, { "from": "CH_SLEEP", "to": "CH_SLEEPING", "kind": "Pointer" } ],
             "blocks": [
-              { "id": "PH_STRESSED", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "stressed", "answer": "stressed", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 stressed，箭頭把 stressed 指給右邊的無色格。" },
-              { "id": "PH_DESSERTS", "dx": 1, "dy": 0, "color": "Colorless", "shape": "Plain", "clue": "desserts", "answer": "PureBlack", "hints": ["BrightYellow"], "why": "暫時的示範內容。無色方角：哪個顏色的方角規則能把指進來的 stressed 變成 desserts？倒過來寫 → PureBlack；重新排列（BrightYellow）也說得通，列為提示答案。" }
+              { "id": "CH_PEEL", "dx": 0, "dy": 0, "color": "Magenta", "shape": "Plain", "clue": "peel", "answer": "peels", "hints": [], "why": "洋紅方角＝單數轉複數：peel（果皮）→ peels，規則複數加 s，答案唯一；就算不認識 peel 也能直接加 s。箭頭把 peels 往右傳。" },
+              { "id": "CH_SLEEP", "dx": 1, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "", "answer": "sleep", "hints": [], "why": "箭頭帶來 peels；黑色方角＝倒過來寫：p-e-e-l-s → s-l-e-e-p，答案唯一。複數加上的 s 倒過來變成開頭，變出完全不同的 sleep，是這條鏈的「啊哈」。箭頭把 sleep 同時傳給右邊和下面。" },
+              { "id": "CH_SLEPT", "dx": 2, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "", "answer": "slept", "hints": [], "why": "箭頭帶來 sleep；深紫方角＝過去式：sleep → slept，過去式和過去分詞都是 slept，答案唯一。" },
+              { "id": "CH_SLEEPING", "dx": 1, "dy": -1, "color": "DeepPurple", "shape": "Beveled", "clue": "", "answer": "sleeping", "hints": [], "why": "箭頭帶來 sleep；深紫切角＝進行式：sleep → sleeping，答案唯一。同一個 sleep 往右是過去式、往下是進行式。整條鏈 peel → peels → sleep → slept／sleeping：複數、倒寫、過去式、進行式。" }
             ]
           },
           {
-            "caption": "", "links": [ { "from": "PH_TEST", "to": "PH_BEST", "kind": "Pointer" } ],
+            "caption": "", "links": [ { "from": "CH_ON", "to": "CH_KNOW", "kind": "Pointer" }, { "from": "CH_KNOW", "to": "CH_KNEW", "kind": "Pointer" }, { "from": "CH_KNEW", "to": "CH_NEW", "kind": "Pointer" }, { "from": "CH_NEW", "to": "CH_ADJECTIVE", "kind": "Pointer" } ],
             "blocks": [
-              { "id": "PH_TEST", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "test", "answer": "test", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 test，箭頭把 test 指給右邊的無色格。" },
-              { "id": "PH_BEST", "dx": 1, "dy": 0, "color": "Colorless", "shape": "Beveled", "clue": "best", "answer": "LightGray", "hints": [], "why": "暫時的示範內容。無色斜角：哪個顏色的斜角規則能把 test 變成 best？押韻 → LightGray，其他斜角規則都不成立。" }
+              { "id": "CH_ON", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "on", "answer": "no", "hints": [], "why": "黑色方角＝倒過來寫：o-n → n-o，答案唯一。5 格長鏈的起點，箭頭把 no 往右傳。" },
+              { "id": "CH_KNOW", "dx": 1, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "", "answer": "know", "hints": [], "why": "箭頭帶來 no；灰色方角＝同音異字：no → know，4 個字母的同音字只有 know，答案唯一。" },
+              { "id": "CH_KNEW", "dx": 2, "dy": 0, "color": "DeepPurple", "shape": "Plain", "clue": "", "answer": "knew", "hints": ["known"], "why": "箭頭帶來 know；深紫方角＝過去式：know → knew。過去分詞 known 是 5 個字母，列為提示答案；字數 (4) 鎖定 knew。" },
+              { "id": "CH_NEW", "dx": 3, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "", "answer": "new", "hints": ["gnu", "nu"], "why": "箭頭帶來 knew；灰色方角＝同音異字：knew → new。gnu（牛羚）也是 3 個字母的同音字，和 nu 一起列為提示答案；new 最直覺，首字母 n 可排除 gnu，nu 只有 2 個字母、字數不合。" },
+              { "id": "CH_ADJECTIVE", "dx": 4, "dy": 0, "color": "Magenta", "shape": "Beveled", "clue": "", "answer": "adjective", "hints": [], "why": "箭頭帶來 new；洋紅切角＝詞性：new 是形容詞 → adjective，學習字典裡 new 只當形容詞，答案唯一。整條鏈 on → no → know → knew → new → adjective：倒寫、同音、過去式、同音、詞性，一個答案一路變形傳到底，也補上洋紅區 adjective 的練習。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "colorless", "accent": "Colorless",
+        "gate": {
+          "links": [],
+          "blocks": [
+            { "id": "GT_COLORLESS", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "colorful", "answer": "colorless", "hints": ["dull", "plain", "pale", "gray", "grey", "drab", "boring", "colourless", "uncolored", "uncoloured", "monochrome", "bland", "faded"], "why": "門前題目，黑色切角＝反義詞：colorful → colorless（無色的）。-ful ↔ -less 是國中常見的字尾對（careful / careless），字數 (9) 加首字母 c 鎖定 colorless；dull、plain、pale、gray、grey、drab、boring、bland、faded、monochrome 與英式拼法 colourless 列為提示答案；同樣是 9 個字母的 uncolored（和英式 uncoloured）也收進提示答案，玩家打出來會被提醒換一個。答案直接說出房間主題：無色。" }
+          ]
+        },
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "CL_POOL", "to": "CL_LOOP", "kind": "Pointer" }, { "from": "CL_POOL", "to": "CL_SCHOOL", "kind": "Pointer" }, { "from": "CL_BLACK_W", "to": "CL_LOOP", "kind": "Bridge" }, { "from": "CL_GRAY_W", "to": "CL_SCHOOL", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "CL_BLACK_W", "dx": 0, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "PureBlack", "answer": "PureBlack", "hints": [], "why": "白色方角＝原字照寫：PureBlack → PureBlack，一定解得出來。題目本身就是顏色名稱，連接橋把「答案是一個顏色名稱」直接告訴下方的無色格。" },
+              { "id": "CL_LOOP", "dx": 0, "dy": 0, "color": "Colorless", "shape": "Plain", "clue": "loop", "answer": "PureBlack", "hints": ["BrightYellow"], "why": "無色方角示範一：箭頭從右邊帶來 pool，這格題目是 loop，上方連接橋給出答案 PureBlack → 玩家看出要回答「哪個顏色的方角規則能把 pool 變成 loop」：純黑方角倒過來寫，p-o-o-l → l-o-o-p。倒寫剛好也是重新排列，BrightYellow 列為提示答案；字數 (9) 和 (12) 不同，不會混淆。其他方角規則（同音、換一個字母等）都不成立。" },
+              { "id": "CL_POOL", "dx": 1, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "pool", "answer": "pool", "hints": [], "why": "白色方角＝原字照寫 pool，往左右各指一個箭頭，把同一個字交給兩個無色格：左邊是方角、右邊是切角，兩格答案不同，讓玩家發現無色格的形狀決定要比對方角規則還是切角規則。" },
+              { "id": "CL_SCHOOL", "dx": 2, "dy": 0, "color": "Colorless", "shape": "Beveled", "clue": "school", "answer": "LightGray", "hints": [], "why": "無色切角示範二：箭頭帶來 pool，題目 school，上方連接橋給出 LightGray → 淺灰切角＝押韻（pool / school）。兩字拼法差很多，看得出是聲音的關係；其他顏色的切角規則（近義、反義、加減字母、搭配詞等）都不能把 pool 變成 school，答案唯一。" },
+              { "id": "CL_GRAY_W", "dx": 2, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "LightGray", "answer": "LightGray", "hints": [], "why": "白色方角＝原字照寫：LightGray → LightGray，連接橋把答案分享給下方的無色切角格。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "CL_CHILD", "to": "CL_KID", "kind": "Pointer" }, { "from": "CL_CHILD", "to": "CL_ADULT", "kind": "Pointer" }, { "from": "CL_CHILD", "to": "CL_CHILDREN", "kind": "Pointer" }, { "from": "CL_CHILD", "to": "CL_BABY", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "CL_CHILDREN", "dx": 1, "dy": 2, "color": "Colorless", "shape": "Plain", "clue": "children", "answer": "Magenta", "hints": [], "why": "無色方角：child → children 是單數轉複數 → Magenta（洋紅方角）。children 也像是在 child 後面加字母，但那是黃色「切角」的規則，這格是方角所以不算；方角規則裡只有洋紅成立，答案唯一。字數 (7) 加首字母 M 可和同為 7 個字母的 RoseRed、SkyCyan 區分。" },
+              { "id": "CL_KID", "dx": 0, "dy": 1, "color": "Colorless", "shape": "Beveled", "clue": "kid", "answer": "PureWhite", "hints": [], "why": "不靠連接橋的練習，先用學過的白色：child → kid 是近義詞 → PureWhite（白色切角）。其他切角規則（反義、押韻、加減字母、下位詞、搭配詞等）都不成立，答案唯一。" },
+              { "id": "CL_CHILD", "dx": 1, "dy": 1, "color": "PureWhite", "shape": "Plain", "clue": "child", "answer": "child", "hints": [], "why": "白色方角＝原字照寫 child，往上下左右四個無色格各指一個箭頭：四格都從同一個字出發，卻是四種顏色。左 kid（PureWhite）、右 adult（PureBlack）用學過的白黑規則，上 children（Magenta）、下 baby（GoldenBrown）再用到新顏色；四格都是國中常見字，而且同屬「小孩」主題。" },
+              { "id": "CL_ADULT", "dx": 2, "dy": 1, "color": "Colorless", "shape": "Beveled", "clue": "adult", "answer": "PureBlack", "hints": [], "why": "無色切角：child → adult 是反義詞 → PureBlack（黑色切角）。和左邊的 kid 同樣是切角、同一個來源，只因字的關係不同，顏色就不同；其他切角規則都不成立，答案唯一。" },
+              { "id": "CL_BABY", "dx": 1, "dy": 0, "color": "Colorless", "shape": "Plain", "clue": "baby", "answer": "GoldenBrown", "hints": ["EmeraldGreen"], "why": "無色方角：child 小時候是 baby（題目是現在、答案是以前，同 frog → tadpole）→ GoldenBrown（金棕方角），字數 (11) 只有它。也可以把 child、baby 看成同一類（人生階段）的成員，EmeraldGreen 列為提示答案（12 個字母，字數不同）。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "bridges", "accent": "",
+        "gate": {
+          "links": [],
+          "blocks": [
+            { "id": "GT_BRIDGES", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "different", "answer": "same", "hints": ["similar", "alike", "identical", "equal", "equivalent", "like", "usual", "normal", "ordinary"], "why": "門前題目，黑色切角＝反義詞：different → same，國中最常見的一對反義詞。similar、alike、identical、equal、equivalent、like 列為提示答案（like 同為 4 個字母，首字母 s 可區分）；different 也有「與眾不同」的意思，usual、normal、ordinary 也收進提示答案。暗示房間主題：不同的方塊、相同的答案。" }
+          ]
+        },
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "BR_FLY", "to": "BR_FLU", "kind": "Bridge" }, { "from": "BR_FEW", "to": "BR_FLOW", "kind": "Bridge" }, { "from": "BR_FLY", "to": "BR_FEW", "kind": "Bridge" }, { "from": "BR_FLU", "to": "BR_FLOW", "kind": "Bridge" }, { "from": "BR_FLY", "to": "BR_FLOW", "kind": "Bridge" }, { "from": "BR_FLU", "to": "BR_FEW", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "BR_FLY", "dx": 0, "dy": 1, "color": "DeepPurple", "shape": "Plain", "clue": "fly", "answer": "flew", "hints": ["flown", "flied"], "why": "第一張網（2×2，上下、左右、斜角共 6 座連接橋，四格全互連）：四個不同顏色、不同題目都得到 flew。深紫方角＝過去式：fly → flew，唯一；過去分詞 flown 列為提示答案，只在棒球（擊出高飛球）用的規則變化 flied 也收進提示答案，順便接住照「加 -ed」規則亂猜的玩家。" },
+              { "id": "BR_FLU", "dx": 1, "dy": 1, "color": "LightGray", "shape": "Plain", "clue": "flu", "answer": "flew", "hints": ["flue"], "why": "灰色方角＝同音異字：flu（流感）和 flew 唸法相同。罕用的 flue 也同音同長度，列為提示答案；只學過教學顏色的玩家也能從這格解開整張網。" },
+              { "id": "BR_FEW", "dx": 0, "dy": 0, "color": "BrightYellow", "shape": "Beveled", "clue": "few", "answer": "flew", "hints": ["fewer", "fewest", "fellow", "farewell", "firework"], "why": "黃色切角＝加字母：在 f 後面插入 l，f-e-w → f-l-e-w。在 few 裡加字母而且剛好 4 個字母的單字只有 flew，字數 (4) 就鎖定答案；fewer、fewest、fellow、farewell、firework 也依序含有 f、e、w，是加字母得到的字，列為提示答案。" },
+              { "id": "BR_FLOW", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "flow", "answer": "flew", "hints": ["flaw", "blow", "glow", "slow", "plow", "flop", "flog", "floe"], "why": "藍色方角＝換一個字母：flow 把 o 換成 e → flew。flaw、blow、glow、slow、plow、flop、flog、floe 也只差一個字母，列為提示答案；單看不唯一（連首尾字母 f…w 都還有 flaw），靠連接橋鎖定。fly、flu、flow、few 四個長得很像的短字全都通到 flew，是這張網的「啊哈」。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "BR_TEDDY", "to": "BR_PANDA", "kind": "Bridge" }, { "from": "BR_CHAIR", "to": "BR_BEARD", "kind": "Bridge" }, { "from": "BR_TEDDY", "to": "BR_CHAIR", "kind": "Bridge" }, { "from": "BR_PANDA", "to": "BR_BEARD", "kind": "Bridge" }, { "from": "BR_TEDDY", "to": "BR_BEARD", "kind": "Bridge" }, { "from": "BR_PANDA", "to": "BR_CHAIR", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "BR_TEDDY", "dx": 0, "dy": 1, "color": "EmeraldGreen", "shape": "Beveled", "clue": "teddy", "answer": "bear", "hints": [], "why": "第二張網（同樣四格全互連）。翡翠綠切角＝搭配詞：teddy → bear（teddy bear 泰迪熊），答案唯一，是這張網最快的入口。" },
+              { "id": "BR_PANDA", "dx": 1, "dy": 1, "color": "RoseRed", "shape": "Plain", "clue": "panda", "answer": "bear", "hints": ["animal", "mammal", "beast", "creature"], "why": "玫瑰紅方角＝上位詞：panda（熊貓）是一種 bear，中文「熊貓」本身就帶「熊」。animal、mammal、beast、creature 也是上位詞，列為提示答案；字數 (4) 鎖定 bear。" },
+              { "id": "BR_CHAIR", "dx": 0, "dy": 0, "color": "LightGray", "shape": "Beveled", "clue": "chair", "answer": "bear", "hints": ["hair", "pair", "pear", "care", "wear", "where", "there", "their", "air", "fair", "share", "stair", "square", "scare", "rare", "dare", "bare", "hare", "stare", "swear", "tear", "spare", "aware", "compare", "prepare", "repair", "fare", "flare", "glare", "mare", "ware", "lair", "heir", "pare", "snare", "flair", "blare", "beware", "unaware", "affair", "declare", "despair", "nightmare", "anywhere", "somewhere", "everywhere", "nowhere", "elsewhere", "underwear", "software", "hardware", "welfare", "millionaire", "prayer"], "why": "灰色切角＝押韻：chair → bear。押韻字很多（hair、pair、care、wear 等，連同 mare、heir、lair 這些較少見的 4 個字母押韻字都列為提示答案），單看不唯一。學過藍色的玩家可以和右邊 beard 的連接橋取交集：beard 依序刪字母得到的 bead、bed、bad、bar、ear 都不和 chair 押韻，只剩 bear；只會白黑灰的玩家點出首字母 b 也只剩 bare（提示答案）和 bear，加上 teddy、panda 兩格很直覺，整張網解得開。" },
+              { "id": "BR_BEARD", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "beard", "answer": "bear", "hints": ["bead", "bed", "bad", "bar", "ear", "ad"], "why": "藍色切角＝減少字母：beard（鬍子）刪掉 d → bear。刪字母要保留剩下字母的原本順序（入口區 heart → hear 的提示答案也不收 rat、tea），所以只收依序刪得出來的 bead、bed、bad、bar、ear、ad；bred、red、are、era 要把字母重新排列才拼得出來，不收。be 是答案 bear 的開頭，不能列；bar 是 bard 的開頭，兩者只收較常見的 bar。4 個字母的候選有 bear、bead、bard，點出尾字母 r 就只剩 bear；和 chair 押韻的交集也只剩 bear。" }
             ]
           }
         ]
