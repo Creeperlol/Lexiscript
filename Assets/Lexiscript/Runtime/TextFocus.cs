@@ -29,8 +29,12 @@ namespace Lexiscript
         /// <summary>取得焦點當下按著的移動鍵，放開前系統連發打出的那個字母不能進欄位。</summary>
         static readonly List<Key> heldAtFocus = new List<Key>();
         static bool holdMovement;
+        static Keyboard imeKeyboard;
 
         public static ITextTarget Current { get; private set; }
+
+        /// <summary>目前的焦點要系統輸入法（筆記、聊天列）；答案欄、透明度欄或沒有焦點時是 false。</summary>
+        public static bool ImeEnabled { get; private set; }
 
         /// <summary>沒有任何焦點時打出來的字，例如按 / 打開聊天列。</summary>
         public static event Action<char> Unfocused;
@@ -61,7 +65,7 @@ namespace Lexiscript
                 foreach (var key in MoveKeys)
                     if (keyboard[key].isPressed) heldAtFocus.Add(key);
             holdMovement = target == null && moving;
-            if (keyboard != null) keyboard.SetIMEEnabled(target != null && target.WantsIme);
+            EnableIme(target != null && target.WantsIme);
             previous?.OnFocusChanged(false);
             // 前一個目標失焦時可能又把焦點交給別人
             if (Current == target) target?.OnFocusChanged(true);
@@ -70,6 +74,36 @@ namespace Lexiscript
         public static void Release(ITextTarget target)
         {
             if (Current == target) Set(null);
+        }
+
+        /// <summary>
+        /// 開關系統輸入法。只開 Input System 的專案裡，光靠 Keyboard.SetIMEEnabled 打不開 Windows 的輸入法：
+        /// 真正的開關仍是舊版的 Input.imeCompositionMode，預設的 Auto 只在 Unity 自己的輸入框被選取時才開
+        /// （uGUI、TMP、UI Toolkit 的輸入框都是在取得焦點時把它設成 On）。這幾個 IME 屬性不像 GetKey 那樣
+        /// 會在停用舊版輸入時丟例外，Input System only 下照常可用，所以兩邊都設。
+        /// </summary>
+        static void EnableIme(bool enabled)
+        {
+            ImeEnabled = enabled;
+            imeKeyboard = Keyboard.current;
+            imeKeyboard?.SetIMEEnabled(enabled);
+            Input.imeCompositionMode = enabled ? IMECompositionMode.On : IMECompositionMode.Auto;
+        }
+
+        /// <summary>
+        /// 每幀呼叫：輸入法模式是全域的，編輯器切換視窗、Unity 自己的輸入框失焦時都會把它改回 Auto；
+        /// 鍵盤裝置換了也要重送給新的那一個。
+        /// </summary>
+        internal static void KeepIme()
+        {
+            if (ImeEnabled && (Input.imeCompositionMode != IMECompositionMode.On || imeKeyboard != Keyboard.current)) EnableIme(true);
+        }
+
+        /// <summary>把輸入法的選字窗移到 position（畫面像素，原點在左上）；兩套 API 都送，理由同 <see cref="EnableIme"/>。</summary>
+        public static void SetImeCursor(Vector2 position)
+        {
+            Keyboard.current?.SetIMECursorPosition(position);
+            Input.compositionCursorPos = position;
         }
 
         /// <summary>這個字是剛拿到焦點時就按著、還沒放開的移動鍵連發出來的。</summary>
@@ -107,6 +141,8 @@ namespace Lexiscript
             Current = null;
             holdMovement = false;
             heldAtFocus.Clear();
+            // 輸入法模式是全域的：編輯器離開 Play 後還開著的話，Scene view 的快捷鍵會被注音吃掉
+            if (ImeEnabled) EnableIme(false);
         }
     }
 

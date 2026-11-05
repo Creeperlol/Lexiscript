@@ -9,8 +9,9 @@ using UnityEngine.UI;
 namespace Lexiscript
 {
     /// <summary>
-    /// 右下角的筆記：可縮小/展開，像一般文字檔一樣編輯（方向鍵、選取、Ctrl+Z/C/V/X/A、換行），
-    /// 可對選取的文字套粗體、底線、斜體；背景透明度輸入百分比調整；Ctrl+滾輪調整字體大小。
+    /// 預設在右下角的筆記：可縮小/展開，按住工具列空白處可拖到別的位置（縮小時固定回右下角），
+    /// 像一般文字檔一樣編輯（方向鍵、選取、Ctrl+Z/C/V/X/A、換行），
+    /// 可對選取的文字套粗體、底線、斜體；紙的透明度輸入百分比調整；Ctrl+滾輪調整字體大小。
     /// 內容與設定自動存檔。
     /// </summary>
     // 按縮小鈕後面板當場變小；排在方塊、暴雷條之後處理點擊，同一下點擊才不會穿透到後面的世界
@@ -25,6 +26,9 @@ namespace Lexiscript
             public int opacity = 100;
             public float fontSize = DefaultFontSize;
             public bool minimized;
+            // 舊存檔沒有位置，讀出來會是 (0, 0)，跟真的拖到那裡分不出來
+            public bool hasOffset;
+            public Vector2 offset;
         }
 
         sealed class Button
@@ -38,19 +42,32 @@ namespace Lexiscript
         static readonly Vector2 ExpandedSize = new Vector2(460, 600), MinimizedSize = new Vector2(150, 44);
         const float Margin = 24, ToolbarHeight = 44, Padding = 14, Border = 2, CaretWidth = 2;
         const float BlinkHalfPeriod = 0.53f, MultiClickTime = 0.35f, SaveDelay = 1f;
+        const int GripColumns = 10, GripRows = 3;
+        const float GripDot = 2, GripPitch = 5, GripAlpha = 0.3f, GripHotAlpha = 0.65f;
         static readonly Color PageColor = Color.white, ToolbarColor = new Color(0.914f, 0.922f, 0.933f);
         static readonly Color HoverColor = new Color(0, 0, 0, 0.08f), ActiveColor = new Color(0, 0, 0, 0.2f);
+
+        /// <summary>沒拖過時展開的位置：右下角離畫面右下角的距離（Canvas 單位）。縮小後一律停在這裡。</summary>
+        public static readonly Vector2 DefaultOffset = new Vector2(-Margin, Margin);
 
         /// <summary>存檔位置；null 代表 persistentDataPath/notes.json。測試改到暫存檔，以免蓋掉玩家的筆記。</summary>
         public static string StoragePath;
 
         readonly TextEditBuffer buffer = new TextEditBuffer(c => c == '\t' || TextEditBuffer.Printable(c), MaxLength, multiline: true);
-        RectTransform rect, viewport, content, caret;
+        RectTransform rect, toolbar, viewport, content, caret;
         GameObject expanded, minimized;
         Image page, caretImage;
+        UiShape grip;
         TextMeshProUGUI text, placeholder;
         Button bold, underline, italic, minimize;
         OpacityField opacityField;
+        /// <summary>
+        /// 展開時的位置，定義同 <see cref="DefaultOffset"/>。視窗變小時畫在夾回畫面內的地方，
+        /// 但這個值不變，視窗變回來就回到原處。
+        /// </summary>
+        Vector2 offset = DefaultOffset;
+        /// <summary>拖曳中滑鼠相對筆記位置的偏移，讓筆記跟著抓住的那一點走。</summary>
+        Vector2 grabOffset;
         string composition = "";
         string clipboardText;
         TextStyle[] clipboardStyles;
@@ -59,7 +76,7 @@ namespace Lexiscript
         int clicks, renderedVersion = -1;
         /// <summary>游標停在軟換行的行尾（而不是下一行開頭）時的 buffer 版本；游標一動或內容一改就失效。</summary>
         int lineEndVersion = -1;
-        bool dragging, layoutDirty = true, revealCaret;
+        bool dragging, moving, layoutDirty = true, revealCaret;
         Vector2 imePosition;
 
         public TextEditBuffer Buffer => buffer;
@@ -77,6 +94,8 @@ namespace Lexiscript
         public RectTransform ItalicButton => italic.Rect;
         public RectTransform MinimizeButton => minimize.Rect;
         public RectTransform OpacityInput => opacityField.Rect;
+        /// <summary>工具列空白處的點陣握把；按住它（或工具列其他空白處）可以拖動筆記。</summary>
+        public RectTransform Grip => grip.rectTransform;
         public float PageAlpha => page.color.a;
 
         static string FilePath => StoragePath ?? Path.Combine(Application.persistentDataPath, "notes.json");
@@ -107,11 +126,11 @@ namespace Lexiscript
         {
             expanded = Ui.Rect("Expanded", transform).gameObject;
             Ui.Fill((RectTransform)expanded.transform);
-            Ui.Fill(Ui.Image("Border", expanded.transform, Art.Ink).rectTransform);
+            Frame(expanded.transform);
             page = Ui.Image("Page", expanded.transform, PageColor);
             Ui.Fill(page.rectTransform, Border, Border, ToolbarHeight + Border, Border);
 
-            var toolbar = Ui.Image("Toolbar", expanded.transform, ToolbarColor).rectTransform;
+            toolbar = Ui.Image("Toolbar", expanded.transform, ToolbarColor).rectTransform;
             toolbar.anchorMin = new Vector2(0, 1);
             toolbar.anchorMax = Vector2.one;
             toolbar.pivot = new Vector2(0.5f, 1);
@@ -122,6 +141,7 @@ namespace Lexiscript
             italic = ToolButton(toolbar, "Italic", "<b><i>I</i></b>", new Vector2(0, 0.5f), new Vector2(88, 0));
             minimize = ToolButton(toolbar, "Minimize", "—", new Vector2(1, 0.5f), new Vector2(-8, 0));
             opacityField = new OpacityField(this, toolbar);
+            grip = DotGrip(toolbar);
 
             viewport = Ui.Rect("Viewport", expanded.transform);
             Ui.Fill(viewport, Border + Padding, Border + Padding, ToolbarHeight + Border + Padding / 2, Border + Padding / 2);
@@ -165,6 +185,42 @@ namespace Lexiscript
             return new Button { Rect = background.rectTransform, Background = background };
         }
 
+        /// <summary>只有四條邊的外框：中間若墊一整塊底色，紙調透明時看到的會是底色而不是後面的世界。</summary>
+        static void Frame(Transform parent)
+        {
+            var frame = Ui.Rect("Border", parent);
+            Ui.Fill(frame);
+            Edge(frame, new Vector2(0, 1), Vector2.one, new Vector2(0, -Border), Vector2.zero);
+            Edge(frame, Vector2.zero, new Vector2(1, 0), Vector2.zero, new Vector2(0, Border));
+            Edge(frame, Vector2.zero, new Vector2(0, 1), Vector2.zero, new Vector2(Border, 0));
+            Edge(frame, new Vector2(1, 0), Vector2.one, new Vector2(-Border, 0), Vector2.zero);
+        }
+
+        static void Edge(Transform frame, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+        {
+            var edge = Ui.Image("Edge", frame, Art.Ink).rectTransform;
+            edge.anchorMin = anchorMin;
+            edge.anchorMax = anchorMax;
+            edge.offsetMin = offsetMin;
+            edge.offsetMax = offsetMax;
+        }
+
+        /// <summary>工具列正中央的細點陣，提示這一條可以抓著拖；正中央剛好落在斜體鈕與透明度欄之間的空白。</summary>
+        static UiShape DotGrip(Transform toolbar)
+        {
+            var shape = Ui.Shape("Grip", toolbar);
+            var size = new Vector2((GripColumns - 1) * GripPitch + GripDot, (GripRows - 1) * GripPitch + GripDot);
+            Ui.Place(shape.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, size);
+            for (int row = 0; row < GripRows; row++)
+                for (int column = 0; column < GripColumns; column++)
+                {
+                    var min = new Vector2(column * GripPitch, row * GripPitch) - size / 2;
+                    shape.Add(Shapes.Rect(min, min + new Vector2(GripDot, GripDot)), Art.Ink);
+                }
+            shape.color = new Color(1, 1, 1, GripAlpha);
+            return shape;
+        }
+
         public bool Covers(Vector2 screen) => Ui.Contains(rect, screen);
 
         /// <summary>滑鼠在筆記上時捲動筆記；Ctrl+滾輪在筆記有焦點時也算（調整字體大小）。</summary>
@@ -199,7 +255,7 @@ namespace Lexiscript
 
         void ApplyLayout()
         {
-            Ui.Place(rect, new Vector2(1, 0), new Vector2(-Margin, Margin), Minimized ? MinimizedSize : ExpandedSize);
+            Ui.Place(rect, new Vector2(1, 0), Minimized ? DefaultOffset : Clamp(offset), Minimized ? MinimizedSize : ExpandedSize);
             expanded.SetActive(!Minimized);
             minimized.SetActive(Minimized);
             var color = PageColor;
@@ -220,6 +276,9 @@ namespace Lexiscript
         void LateUpdate()
         {
             if (Minimized) return;
+            // 視窗大小隨時可能改變（拖動 Game view、切換解析度）
+            var shown = Clamp(offset);
+            if (rect.anchoredPosition != shown) rect.anchoredPosition = shown;
             Render();
             if (revealCaret) RevealCaret();
             revealCaret = false;
@@ -230,7 +289,7 @@ namespace Lexiscript
                 // 讓輸入法的選字窗跟著游標（游標底邊）；Input System 的座標原點在左上，uGUI 的在左下
                 var bottom = RectTransformUtility.WorldToScreenPoint(null, caret.position);
                 var position = new Vector2(bottom.x, Screen.height - bottom.y);
-                if (position != imePosition) Keyboard.current?.SetIMECursorPosition(position);
+                if (position != imePosition) TextFocus.SetImeCursor(position);
                 imePosition = position;
             }
             opacityField.Blink();
@@ -238,6 +297,9 @@ namespace Lexiscript
             underline.Background.color = ButtonColor(underline, buffer.Has(TextStyle.Underline));
             italic.Background.color = ButtonColor(italic, buffer.Has(TextStyle.Italic));
             minimize.Background.color = ButtonColor(minimize, false);
+            var mouse = Mouse.current;
+            bool hot = moving || (mouse != null && OnHandle(mouse.position.ReadValue()));
+            grip.color = new Color(1, 1, 1, hot ? GripHotAlpha : GripAlpha);
         }
 
         Color ButtonColor(Button button, bool active)
@@ -251,6 +313,19 @@ namespace Lexiscript
         {
             if (Hud.ModalOpen) return;
             Vector2 screen = mouse.position.ReadValue();
+            if (moving)
+            {
+                if (mouse.leftButton.isPressed)
+                {
+                    offset = Clamp(ParentPoint(screen) - grabOffset);
+                    rect.anchoredPosition = offset;
+                }
+                else
+                {
+                    moving = false;
+                    ScheduleSave();
+                }
+            }
             if (dragging)
             {
                 if (mouse.leftButton.isPressed)
@@ -301,6 +376,33 @@ namespace Lexiscript
             else if (Ui.Contains(minimize.Rect, screen)) SetMinimized(true);
             else if (Ui.Contains(opacityField.Rect, screen)) TextFocus.Set(opacityField);
             else if (Ui.Contains(viewport, screen)) ClickText(screen);
+            else if (OnHandle(screen))
+            {
+                moving = true;
+                grabOffset = ParentPoint(screen) - rect.anchoredPosition;
+            }
+        }
+
+        /// <summary>工具列上不是按鈕、也不是透明度欄的地方。</summary>
+        bool OnHandle(Vector2 screen) =>
+            Ui.Contains(toolbar, screen) && !Ui.Contains(bold.Rect, screen) && !Ui.Contains(underline.Rect, screen)
+            && !Ui.Contains(italic.Rect, screen) && !Ui.Contains(minimize.Rect, screen) && !Ui.Contains(opacityField.Rect, screen);
+
+        Vector2 ParentPoint(Vector2 screen)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle((RectTransform)rect.parent, screen, null, out var local);
+            return local;
+        }
+
+        /// <summary>整個筆記留在畫面內；畫面比筆記還小時，至少露出左上角，工具列才抓得到。</summary>
+        Vector2 Clamp(Vector2 target)
+        {
+            var area = ((RectTransform)rect.parent).rect.size;
+            // 還沒排版的 Canvas 可能量到 0，夾了反而會把筆記推到畫面外
+            if (area.x <= 0 || area.y <= 0) return target;
+            float x = Mathf.Max(Mathf.Min(target.x, 0), ExpandedSize.x - area.x);
+            float y = Mathf.Min(Mathf.Max(target.y, 0), area.y - ExpandedSize.y);
+            return new Vector2(x, y);
         }
 
         void ToggleStyle(TextStyle style)
@@ -719,6 +821,7 @@ namespace Lexiscript
                 Opacity = Mathf.Clamp(data.opacity, 0, 100);
                 FontSize = Mathf.Clamp(data.fontSize, MinFontSize, MaxFontSize);
                 Minimized = data.minimized;
+                if (data.hasOffset) offset = data.offset;
             }
             catch (Exception exception)
             {
@@ -732,7 +835,11 @@ namespace Lexiscript
             saveAt = float.PositiveInfinity;
             var styles = new StringBuilder(buffer.Length);
             for (int i = 0; i < buffer.Length; i++) styles.Append((char)('0' + (int)buffer.StyleAt(i)));
-            var data = new SaveData { text = buffer.Text, styles = styles.ToString(), opacity = Opacity, fontSize = FontSize, minimized = Minimized };
+            var data = new SaveData
+            {
+                text = buffer.Text, styles = styles.ToString(), opacity = Opacity, fontSize = FontSize, minimized = Minimized,
+                hasOffset = true, offset = offset,
+            };
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(FilePath));

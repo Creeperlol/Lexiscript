@@ -289,7 +289,7 @@ namespace Lexiscript
             // 讓輸入法的選字窗跟著游標（游標底邊）；Input System 的座標原點在左上，uGUI 的在左下
             var bottom = RectTransformUtility.WorldToScreenPoint(null, caret.TransformPoint(new Vector3(0, caret.rect.yMin)));
             var position = new Vector2(bottom.x, Screen.height - bottom.y);
-            if (position != imePosition) Keyboard.current?.SetIMECursorPosition(position);
+            if (position != imePosition) TextFocus.SetImeCursor(position);
             imePosition = position;
         }
 
