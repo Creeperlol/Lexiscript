@@ -419,7 +419,8 @@ namespace Lexiscript
             reset = new Button { Rect = At(Ui.Rect("Reset", resetRow), w - PadX - ResetWidth, (RowHeight - ControlHeight) / 2, ResetWidth, ControlHeight) };
             var outline = Box(0, 0, ResetWidth, ControlHeight);
             var resetFrame = Shape("Frame", reset.Rect, 0, 0, ResetWidth, ControlHeight);
-            resetFrame.AddAll(HudStyle.Hatch(HudStyle.Chamfered(Box(2, 2, ResetWidth - 4, ControlHeight - 4), 9, 0, 9, 0), 10, 3), HudStyle.WithAlpha(HudStyle.Danger, 0.25f));
+            // 斜紋只是底紋：太濃的話同樣是紅色的字會跟它糊在一起看不清
+            resetFrame.AddAll(HudStyle.Hatch(HudStyle.Chamfered(Box(2, 2, ResetWidth - 4, ControlHeight - 4), 9, 0, 9, 0), 10, 3), HudStyle.WithAlpha(HudStyle.Danger, 0.12f));
             resetFrame.AddAll(HudStyle.Frame(outline, 10, 0, 10, 0, 2), HudStyle.Danger);
             reset.Fill = Shape("Hover", reset.Rect, 0, 0, ResetWidth, ControlHeight);
             reset.Fill.Add(HudStyle.Chamfered(outline, 10, 0, 10, 0), HudStyle.Danger);
@@ -450,7 +451,8 @@ namespace Lexiscript
             // 字畫在金色選取塊上面，所以最後才建
             for (int i = 0; i < options.Length; i++)
             {
-                var label = AddLabel(control, half * i, 0, half, ControlHeight, 19, Idle, TextAlignmentOptions.Center, options[i].english, options[i].chinese, 8, 2);
+                // 中文細筆畫壓在金色選取塊上會糊成灰色，跟標題一樣加粗
+                var label = AddLabel(control, half * i, 0, half, ControlHeight, 19, Idle, TextAlignmentOptions.Center, options[i].english, options[i].chinese, 8, 2, true);
                 choice.Options[i].Label = label;
                 choice.Options[i].Rect = label.Text.rectTransform;
             }
