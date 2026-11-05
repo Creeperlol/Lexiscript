@@ -39,6 +39,10 @@ namespace Lexiscript
         public static readonly Color Paper = Hex(0xFCFCFA);
         public static readonly Color PlaceholderInk = Hex(0xA9AEB7);
         public static readonly Color Correct = Hex(0x15994F);
+        /// <summary>強調色淺金：答對特效與介面重點。</summary>
+        public static readonly Color Gold = Hex(0xF2D27A);
+        /// <summary>淡金：已解開的答案欄底色。比淺金淡，答對的綠字才看得清楚。</summary>
+        public static readonly Color PaleGold = Hex(0xF8EBC2);
         public static readonly Color Hatch = Hex(0x9EA4AE);
         public static readonly Color FloorInk = Hex(0x5C626D);
         public static readonly Color DoorColor = Hex(0x4A505A);
@@ -76,6 +80,9 @@ namespace Lexiscript
             { BlockColor.SunsetOrange, Hex(0xFF7A1A) },
             { BlockColor.GoldenBrown, Hex(0xA8701E) },
         };
+
+        /// <summary>方塊色框的顏色。無色沒有自己的顏色，色框是地板色再疊斜紋。</summary>
+        public static Color Swatch(BlockColor color) => Palette.TryGetValue(color, out var swatch) ? swatch : FloorColor;
 
         static Color Hex(int rgb) =>
             new Color((rgb >> 16 & 0xFF) / 255f, (rgb >> 8 & 0xFF) / 255f, (rgb & 0xFF) / 255f);
@@ -134,7 +141,7 @@ namespace Lexiscript
         /// <summary>
         /// 白色答案欄。斜切方塊的欄位下緣兩角也切掉，讓它跟斜邊之間的深灰邊距一樣寬。
         /// </summary>
-        static List<Vector2> AnswerBox(BlockShape shape)
+        public static List<Vector2> AnswerBox(BlockShape shape)
         {
             float cut = Shapes.InsetChamfer(ChamferOf(shape), Half + BoxBottom);
             if (cut <= 0) return Shapes.Rect(new Vector2(BoxLeft, BoxBottom), new Vector2(BoxRight, BoxTop));

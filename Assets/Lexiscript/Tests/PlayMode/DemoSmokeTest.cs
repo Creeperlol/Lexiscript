@@ -161,6 +161,8 @@ namespace Lexiscript
             Assert.IsTrue(board.Blocks.All(block => block.IsPure || board.Puzzle.IsSolved(block.name)));
             Assert.IsTrue(board.Blocks.All(block => block.IsPure || Shown(block) == block.answer));
 
+            // 最後幾格的答對動畫還在播，等播完截圖才是解開後的樣子
+            yield return new WaitForSeconds(SolveEffect.Seconds);
             InputHarness.Shot("03_chain_solved", new Vector2(5f, 20f), 3.4f);
             InputHarness.Shot("06_overview_solved", new Vector2(10.5f, 10.5f), 12.5f);
             InputHarness.Shot("07_colorless_solved", new Vector2(17.5f, 18.75f), 3.4f);
