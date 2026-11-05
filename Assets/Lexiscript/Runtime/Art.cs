@@ -181,10 +181,10 @@ namespace Lexiscript
                 : new Vector2(0, Mathf.Sign(delta.y));
 
         /// <summary>
-        /// 牆、地板、房間之間的門口，以及地板上的平面裝飾。
+        /// 牆、地板、房間之間的門口，以及地板上的平面裝飾；plots 是大地圖分區與門後房間的地面標記（見 <see cref="Plot"/>）。
         /// 牆先畫成比地板大一圈的矩形，再用地板蓋掉內側，相鄰房間共用的牆就只剩一道。
         /// </summary>
-        public static Mesh Rooms(IList<Rect> floors, IList<Rect> doorways, int seed)
+        public static Mesh Rooms(IList<Rect> floors, IList<Rect> doorways, int seed, IList<(Rect area, BlockColor? accent, bool flipped)> plots = null)
         {
             var mesh = new MeshBuilder();
             var wall = Vector2.one * WallThickness;
@@ -193,6 +193,8 @@ namespace Lexiscript
             foreach (var doorway in doorways) mesh.Add(Shapes.Rect(doorway.min, doorway.max), FloorColor);
             var random = new System.Random(seed);
             foreach (var floor in floors) Decorate(mesh, floor, random);
+            if (plots != null)
+                foreach (var (area, accent, flipped) in plots) Plot(mesh, area, accent, flipped);
             return mesh.Apply(new Mesh());
         }
 
@@ -231,6 +233,202 @@ namespace Lexiscript
                         mesh.Add(ClipTo(Shapes.Polygon(origin + new Vector2(x, y) * 0.45f, 0.07f, 12, 0), floor), color);
             }
         }
+
+        const float PlotChamfer = 1.4f, PlotLine = 0.05f, MarkInset = 0.35f, PlotBar = 0.42f, PlotBarLong = 3.2f, PlotBarShort = 1.8f;
+        const float PlotBracket = 1.1f, PlotBracketWidth = 0.12f, BarcodeHeight = 0.5f, BarcodeGap = 0.08f;
+        static readonly float[] Barcode = { 0.1f, 0.05f, 0.2f, 0.05f, 0.1f, 0.2f, 0.05f, 0.15f, 0.05f };
+        static readonly Color PlotPaper = Hex(0xE8EAEE), PlotEdge = Hex(0xB9BDC4), PlotMark = Hex(0x8F96A1);
+
+        const float CoverStripePitch = 0.7f, CoverStripeWidth = 0.16f, CoverFrameInset = 0.45f, CoverLineWidth = 0.06f;
+        const float CoverBracket = 1.3f, CoverBracketWidth = 0.16f, CoverWipeBand = 0.35f;
+        // 鎖離門那一側的距離：站在門口（畫面半寬約 8.9）就看得到
+        const float EmblemReach = 6.5f, EmblemRadius = 2f, EmblemBarcode = 0.75f;
+        static readonly Color CoverRoof = Hex(0x767C86), CoverStripe = Hex(0x6D737D), CoverLine = Hex(0xAEB3BB);
+
+        /// <summary>
+        /// 大地圖分區（與門後房間）的地面標記：帶一點該色的淺色地塊、右上角 45° 斜切、細外框，
+        /// 左上角一組該色的 L 形粗條、右下角括號、左下角條碼。只有圖形沒有字，不會變成提示。
+        /// accent 為 null 時是中性灰，無色用斜紋。標記都畫在地塊的內距裡，不會被方塊蓋住。
+        /// flipped 時上下顛倒（粗條在左下角）：在路北側的分區、門在下方的房間，從路上或門口走近時先看到粗條。
+        /// </summary>
+        public static void Plot(MeshBuilder mesh, Rect area, BlockColor? accent, bool flipped = false)
+        {
+            bool colorless = accent == BlockColor.Colorless;
+            Color strong = accent == null ? PlotMark : colorless ? Hatch : Swatch(accent.Value);
+            Color paper = accent == null || colorless ? PlotPaper : Color.Lerp(PlotPaper, strong, 0.1f);
+            var line = Vector2.one * PlotLine;
+            mesh.Add(Chamfered(area.min - line, area.max + line, Shapes.InsetChamfer(PlotChamfer, -PlotLine), flipped), PlotEdge);
+            mesh.Add(Chamfered(area.min, area.max, PlotChamfer, flipped), paper);
+
+            // 以沒顛倒時離上緣的距離來擺，顛倒時改成離下緣
+            Vector2 At(float x, float fromTop) => new Vector2(x, flipped ? area.yMin + fromTop : area.yMax - fromTop);
+            (Vector2 min, Vector2 max) Bar(Vector2 a, Vector2 b) => (Vector2.Min(a, b), Vector2.Max(a, b));
+            float left = area.xMin + MarkInset;
+            var bars = new[]
+            {
+                Bar(At(left, MarkInset), At(left + PlotBar, MarkInset + PlotBarLong)),
+                Bar(At(left, MarkInset), At(left + PlotBarShort, MarkInset + PlotBar)),
+            };
+            // 兩條的外框都畫完才填色，交疊處才不會被外框切開；淺色（純白）的粗條靠外框才看得見
+            var outline = Vector2.one * Outline;
+            foreach (var (min, max) in bars) mesh.Add(Shapes.Rect(min - outline, max + outline), Ink);
+            foreach (var (min, max) in bars)
+            {
+                mesh.Add(Shapes.Rect(min, max), colorless ? FloorColor : strong);
+                if (colorless) Stripes(mesh.Add, Shapes.Rect(min, max), HatchPitch, HatchWidth, Hatch);
+            }
+
+            float bottom = area.height - MarkInset;
+            var end = At(area.xMax - MarkInset, bottom);
+            mesh.Add(Box(end - new Vector2(PlotBracket, 0), At(end.x, bottom - PlotBracketWidth)), PlotMark);
+            mesh.Add(Box(end - new Vector2(PlotBracketWidth, 0), At(end.x, bottom - PlotBracket)), PlotMark);
+            // 條碼從原點往上畫，顛倒時原點要取條碼的另一端
+            DrawBarcode(mesh.Add, At(left, flipped ? bottom - BarcodeHeight : bottom), 1, PlotMark);
+        }
+
+        /// <summary>遮罩從門所在的那一邊往內收起的方向；door 是門相對於遮罩中心的位置（門在遮罩外，取最靠近的那一邊）。</summary>
+        public static Vector2 CoverInward(Vector2 size, Vector2 door) =>
+            Mathf.Abs(door.x) * size.y >= Mathf.Abs(door.y) * size.x
+                ? new Vector2(-Mathf.Sign(door.x), 0)
+                : new Vector2(0, -Mathf.Sign(door.y));
+
+        /// <summary>鎖的位置（以遮罩中心為原點）：從門那一側往內 <see cref="EmblemReach"/>、對齊門口；房間太淺時就在正中間。</summary>
+        public static Vector2 CoverEmblem(Vector2 size, Vector2 inward, Vector2 door)
+        {
+            var half = size / 2;
+            var along = new Vector2(Mathf.Abs(inward.x), Mathf.Abs(inward.y));
+            var side = new Vector2(along.y, along.x);
+            float depth = Vector2.Dot(half, along);
+            float room = Vector2.Dot(half, side) - EmblemRadius - EmblemBarcode - CoverFrameInset;
+            float lateral = room > 0 ? Mathf.Clamp(Vector2.Dot(door, side), -room, room) : 0;
+            return inward * (Mathf.Min(depth, EmblemReach) - depth) + side * lateral;
+        }
+
+        /// <summary>
+        /// 房間遮罩（以遮罩中心為原點，size 是地板大小）：比牆深一點的灰色屋頂、細斜紋、內框與四角括號，emblem 處一把鎖。
+        /// wipe 大於 0 時從門那一側（inward 的反方向）沿 45° 斜線往內擦掉，擦除的邊緣是一條淺金色帶。
+        /// </summary>
+        public static void Cover(MeshBuilder mesh, Vector2 size, Vector2 inward, Vector2 emblem, float wipe)
+        {
+            var half = size / 2;
+            var bounds = new Rect(-half, size);
+            CoverCut(size, inward, wipe, out var normal, out float cut);
+            void Add(List<Vector2> polygon, Color color) => mesh.Add(Shapes.Clip(ClipTo(polygon, bounds), -normal, -cut), color);
+
+            var whole = Shapes.Rect(-half, half);
+            Add(whole, CoverRoof);
+            Stripes(Add, whole, CoverStripePitch, CoverStripeWidth, CoverStripe);
+
+            var inner = half - Vector2.one * CoverFrameInset;
+            var line = Vector2.one * CoverLineWidth;
+            Add(Shapes.Rect(new Vector2(-inner.x, inner.y - line.y), inner), CoverLine);
+            Add(Shapes.Rect(-inner, new Vector2(inner.x, -inner.y + line.y)), CoverLine);
+            Add(Shapes.Rect(-inner, new Vector2(-inner.x + line.x, inner.y)), CoverLine);
+            Add(Shapes.Rect(new Vector2(inner.x - line.x, -inner.y), inner), CoverLine);
+            foreach (var direction in new[] { new Vector2(-1, -1), new Vector2(1, -1), new Vector2(1, 1), new Vector2(-1, 1) })
+            {
+                var corner = Vector2.Scale(inner, direction);
+                Add(Box(corner, corner - Vector2.Scale(direction, new Vector2(CoverBracket, CoverBracketWidth))), CoverLine);
+                Add(Box(corner, corner - Vector2.Scale(direction, new Vector2(CoverBracketWidth, CoverBracket))), CoverLine);
+            }
+            Lock(Add, emblem);
+
+            Add(Shapes.Clip(whole, normal, cut + CoverWipeBand), Gold);
+        }
+
+        /// <summary>遮罩擦到 wipe 時，local（以遮罩中心為原點）還被蓋著。</summary>
+        public static bool CoverRemains(Vector2 size, Vector2 inward, float wipe, Vector2 local)
+        {
+            CoverCut(size, inward, wipe, out var normal, out float cut);
+            return Vector2.Dot(local, normal) >= cut;
+        }
+
+        /// <summary>dot(p, normal) ≥ cut 的部分還蓋著；wipe 0 是全部蓋住（金色帶也還在外面），1 是全部收起。</summary>
+        static void CoverCut(Vector2 size, Vector2 inward, float wipe, out Vector2 normal, out float cut)
+        {
+            // 取讓切線呈 "/" 的那條垂直方向，跟屋頂的斜紋同向
+            normal = (inward + new Vector2(-inward.y, -inward.x)).normalized;
+            float reach = Mathf.Abs(normal.x) * size.x / 2 + Mathf.Abs(normal.y) * size.y / 2;
+            cut = Mathf.Lerp(-reach - CoverWipeBand, reach, wipe);
+        }
+
+        /// <summary>菱形外框裡的鎖頭（墨色鎖身、淺金鑰匙孔），菱形下方一段條碼。</summary>
+        static void Lock(System.Action<List<Vector2>, Color> add, Vector2 center)
+        {
+            const float shackle = 0.46f, thickness = 0.16f, bodyHalf = 0.66f, bodyTop = 0.1f, bodyBottom = -0.82f, cut = 0.14f;
+            const int steps = 10;
+            add(Shapes.Diamond(center, EmblemRadius), CoverLine);
+            add(Shapes.Diamond(center, EmblemRadius - 0.16f), CoverRoof);
+            var hub = center + new Vector2(0, bodyTop + 0.28f);
+            for (int i = 0; i < steps; i++)
+            {
+                float from = Mathf.PI * i / steps, to = Mathf.PI * (i + 1) / steps;
+                Vector2 a = new Vector2(Mathf.Cos(from), Mathf.Sin(from)), b = new Vector2(Mathf.Cos(to), Mathf.Sin(to));
+                add(new List<Vector2> { hub + a * (shackle - thickness), hub + a * shackle, hub + b * shackle, hub + b * (shackle - thickness) }, Ink);
+            }
+            add(Box(hub + new Vector2(-shackle, 0), center + new Vector2(-shackle + thickness, bodyTop)), Ink);
+            add(Box(hub + new Vector2(shackle - thickness, 0), center + new Vector2(shackle, bodyTop)), Ink);
+            add(new List<Vector2>
+            {
+                center + new Vector2(-bodyHalf + cut, bodyBottom), center + new Vector2(bodyHalf - cut, bodyBottom),
+                center + new Vector2(bodyHalf, bodyBottom + cut), center + new Vector2(bodyHalf, bodyTop),
+                center + new Vector2(-bodyHalf, bodyTop), center + new Vector2(-bodyHalf, bodyBottom + cut),
+            }, Ink);
+            add(Shapes.Polygon(center + new Vector2(0, -0.28f), 0.12f, 16, 0), Gold);
+            add(new List<Vector2>
+            {
+                center + new Vector2(-0.05f, -0.3f), center + new Vector2(0.05f, -0.3f),
+                center + new Vector2(0.08f, -0.58f), center + new Vector2(-0.08f, -0.58f),
+            }, Gold);
+            float width = BarcodeWidth(1.4f);
+            DrawBarcode(add, center + new Vector2(-width / 2, -EmblemRadius - EmblemBarcode), 1.4f, CoverLine);
+        }
+
+        static float BarcodeWidth(float scale)
+        {
+            float width = -BarcodeGap * scale;
+            foreach (var bar in Barcode) width += (bar + BarcodeGap) * scale;
+            return width;
+        }
+
+        /// <summary>粗細不一的直條；origin 是左下角。</summary>
+        static void DrawBarcode(System.Action<List<Vector2>, Color> add, Vector2 origin, float scale, Color color)
+        {
+            float x = origin.x;
+            foreach (var bar in Barcode)
+            {
+                add(Shapes.Rect(new Vector2(x, origin.y), new Vector2(x + bar * scale, origin.y + BarcodeHeight * scale)), color);
+                x += (bar + BarcodeGap) * scale;
+            }
+        }
+
+        /// <summary>在凸多邊形範圍內畫 "/" 方向的 45° 斜紋。</summary>
+        static void Stripes(System.Action<List<Vector2>, Color> add, List<Vector2> polygon, float pitch, float width, Color color)
+        {
+            var across = new Vector2(1, -1).normalized;
+            float min = float.MaxValue, max = float.MinValue;
+            foreach (var point in polygon)
+            {
+                float d = Vector2.Dot(point, across);
+                min = Mathf.Min(min, d);
+                max = Mathf.Max(max, d);
+            }
+            for (float d = Mathf.Floor(min / pitch) * pitch; d < max; d += pitch)
+                add(Shapes.Clip(Shapes.Clip(polygon, across, d + width), -across, -d), color);
+        }
+
+        /// <summary>右上角（bottom 時右下角）切成 45° 斜角的長方形（逆時針）。</summary>
+        static List<Vector2> Chamfered(Vector2 min, Vector2 max, float chamfer, bool bottom) => bottom
+            ? new List<Vector2>
+            {
+                min, new Vector2(max.x - chamfer, min.y), new Vector2(max.x, min.y + chamfer), max, new Vector2(min.x, max.y),
+            }
+            : new List<Vector2>
+            {
+                min, new Vector2(max.x, min.y), new Vector2(max.x, max.y - chamfer), new Vector2(max.x - chamfer, max.y), new Vector2(min.x, max.y),
+            };
+
+        static List<Vector2> Box(Vector2 a, Vector2 b) => Shapes.Rect(Vector2.Min(a, b), Vector2.Max(a, b));
 
         static List<Vector2> ClipTo(List<Vector2> polygon, Rect rect)
         {

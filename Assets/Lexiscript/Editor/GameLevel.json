@@ -1,7 +1,7 @@
 {
   "rooms": [
     {
-      "key": "white-same", "tutorial": true, "doorRequired": 4,
+      "key": "white-same", "tutorial": true,
       "texts": [
         "WASD to move · hold Shift to sprint · scroll to zoom",
         "Click the lower half of a block to type an answer",
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "key": "white-synonym", "tutorial": true, "doorRequired": 4,
+      "key": "white-synonym", "tutorial": true,
       "texts": [
         "Cut corners? Try a word that means the same.",
         "Many words fit? Show the first or last letter."
@@ -45,13 +45,13 @@
         {
           "caption": "", "links": [],
           "blocks": [
-            { "id": "W2_SICK_PLAIN", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "sick", "answer": "sick", "hints": [], "why": "白色方角＝原字照寫：sick → sick。開場對照：右邊是同題目 sick 的斜角格，兩格只差形狀，讓玩家自己發現斜角改變了規則。" }
+            { "id": "W2_PRETTY_PLAIN", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "pretty", "answer": "pretty", "hints": [], "why": "白色方角＝原字照寫：pretty → pretty。開場對照：右邊是同題目 pretty 的斜角格，兩格只差形狀，讓玩家自己發現斜角改變了規則。取代原本的 sick（玩家回報斜角那格的答案 ill 太難）。" }
           ]
         },
         {
           "caption": "", "links": [],
           "blocks": [
-            { "id": "W2_SICK_CUT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Beveled", "clue": "sick", "answer": "ill", "hints": ["unwell", "poorly", "ailing", "queasy", "nauseous", "unhealthy", "infirm", "sickly", "diseased", "nauseated", "tired", "weary"], "why": "白色斜角＝近義詞：sick → ill。常見同義字裡只有 ill 是 3 個字母，長度 (3) 直接鎖定；unwell、poorly 等列為提示答案，也收 sick of 那個意思的 tired、weary。" }
+            { "id": "W2_PRETTY_CUT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Beveled", "clue": "pretty", "answer": "beautiful", "hints": ["lovely", "cute", "nice", "attractive", "gorgeous", "charming", "handsome", "elegant", "stunning", "adorable", "sweet", "fine", "appealing", "graceful", "quite", "rather", "fairly", "somewhat"], "why": "白色斜角＝近義詞：pretty → beautiful。取代原本的 sick → ill（玩家不認識 ill）：pretty 與 beautiful 都是國中最基本的形容詞，也是中文「漂亮」最直覺的兩種說法。9 個字母的常見同義字只有 beautiful（appealing 也是 9 個字母但不自然，列為提示答案，首字母 b 可鎖定）。lovely、cute、nice、gorgeous 等常見同義字，以及 pretty 當副詞「相當」時的 quite、rather、fairly、somewhat 都列為提示答案；沒有任何一個字是另一個字的開頭。不收 pretty 本身：同一個字不是近義詞，打 pretty 正是斜角要玩家改掉的想法。" }
           ]
         },
         {
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "key": "black-reverse", "tutorial": true, "doorRequired": 4,
+      "key": "black-reverse", "tutorial": true,
       "texts": [
         "Black turns words around.",
         "Stuck? Show the answer's first letter.",
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "key": "black-antonym", "tutorial": true, "doorRequired": 4,
+      "key": "black-antonym", "tutorial": true,
       "texts": [
         "Square black flips the spelling. What does cut black flip?",
         "Opposites attract!"
@@ -154,7 +154,7 @@
       ]
     },
     {
-      "key": "mixed", "tutorial": true, "doorRequired": 6,
+      "key": "mixed", "tutorial": true,
       "texts": [
         "Arrows pass a block's answer on as the next block's clue.",
         "Empty clue? Look where its arrow comes from.",
@@ -186,7 +186,7 @@
       ]
     },
     {
-      "key": "gray-homophone", "tutorial": true, "doorRequired": 6,
+      "key": "gray-homophone", "tutorial": true,
       "texts": [
         "Bridged blocks share the same answer.",
         "Solve the side you know, then cross the bridge.",
@@ -224,7 +224,7 @@
       ]
     },
     {
-      "key": "gray-rhyme", "tutorial": true, "doorRequired": 6,
+      "key": "gray-rhyme", "tutorial": true,
       "texts": [
         "Gray with cut corners. Say each pair: where do they match?",
         "Bridges still mean: same answer on both sides.",
@@ -259,75 +259,137 @@
           ]
         }
       ]
-    },
-    {
-      "key": "open", "tutorial": false, "doorRequired": 0,
-      "texts": [
-        "From here on, you're on your own."
-      ],
-      "groups": [
-        {
-          "caption": "", "links": [ { "from": "O_SILENT", "to": "O_LISTEN", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_SILENT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "silent", "answer": "silent", "hints": [], "why": "白色方角＝原字照寫 silent（既有題，原樣保留），連接橋分享 silent。" },
-            { "id": "O_LISTEN", "dx": 1, "dy": 0, "color": "BrightYellow", "shape": "Plain", "clue": "listen", "answer": "silent", "hints": ["tinsel", "enlist", "inlets"], "why": "與 silent 連接；listen 和 silent 字母完全相同、只換順序 → 推出黃色方角＝重新排列（既有題，原樣保留）。兩字不押韻，也不是一字之差。" }
-          ]
-        },
-        {
-          "caption": "", "links": [ { "from": "O_PLANET", "to": "O_PLANE", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_PLANET", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "planet", "answer": "planet", "hints": [], "why": "白色方角＝原字照寫 planet（既有題，原樣保留），連接橋分享 planet。" },
-            { "id": "O_PLANE", "dx": 0, "dy": -1, "color": "BrightYellow", "shape": "Beveled", "clue": "plane", "answer": "planet", "hints": ["planes", "planed", "planer", "planned", "planner", "planted", "planter", "airplane", "aeroplane", "seaplane", "biplane", "explained"], "why": "與 planet 連接；plane 在最後加 t → 推出黃色斜角＝加字母（既有題，補齊提示答案）。planets 以 planet 開頭，不能列。" }
-          ]
-        },
-        {
-          "caption": "", "links": [ { "from": "O_COLD", "to": "O_HAT", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_COLD", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "cold", "answer": "hot", "hints": ["warm", "heated", "boiling", "burning", "fiery", "friendly"], "why": "黑色斜角＝反義詞：cold → hot，3 個字母的只有 hot；warm 等列為提示答案。" },
-            { "id": "O_HAT", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "hat", "answer": "hot", "hints": ["bat", "cat", "eat", "fat", "mat", "oat", "pat", "rat", "sat", "vat", "hit", "hut", "had", "ham", "has", "hay"], "why": "與 cold 的答案 hot 連接；hat 只把 a 換成 o → 推出藍色方角＝換一個字母。hat 和 hot 不押韻也不同音；既是 hat 的一字之差、又是 cold 的反義詞的只有 hot。" }
-          ]
-        },
-        {
-          "caption": "", "links": [ { "from": "O_TEST", "to": "O_TESTY", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_TEST", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "test", "answer": "test", "hints": [], "why": "白色方角＝原字照寫 test（既有題，原樣保留），連接橋分享 test。" },
-            { "id": "O_TESTY", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "testy", "answer": "test", "hints": ["sty"], "why": "與 test 連接；testy 刪掉 y → 推出藍色斜角＝減少字母（既有題）。原本的提示答案 tey 不是英文字，改成 sty（s、t、y 依序出現在 testy 裡）。" }
-          ]
-        },
-        {
-          "caption": "", "links": [ { "from": "O_LIZARD", "to": "O_WIZARD", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_LIZARD", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "lizard", "answer": "lizard", "hints": [], "why": "白色方角＝原字照寫 lizard（既有題，原樣保留），連接橋分享 lizard。" },
-            { "id": "O_WIZARD", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "wizard", "answer": "lizard", "hints": [], "why": "與 lizard 連接；wizard 只把 w 換成 l（既有題，原樣保留）。wizard 和 lizard 也押韻，所以排在乾淨的 hat/hot 之後，當藍色方角的第二個例子。" }
-          ]
-        },
-        {
-          "caption": "", "links": [],
-          "blocks": [
-            { "id": "O_CASTLE", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "castle", "answer": "cattle", "hints": [], "why": "獨立題，藍色方角＝換一個字母：castle 的第 3 個字母 s 換成 t → cattle，是唯一常見的一字之差。放在 lizard/wizard 旁邊，剛推出規則就能套用。" }
-          ]
-        },
-        {
-          "caption": "", "links": [],
-          "blocks": [
-            { "id": "O_FRIED", "dx": 0, "dy": 0, "color": "BrightYellow", "shape": "Beveled", "clue": "fried", "answer": "friend", "hints": ["befriend", "refried", "frilled", "fringed", "frisked", "frightened", "boyfriend", "girlfriend"], "why": "獨立題，黃色斜角＝加字母：f-r-i-e-d 在 e 和 d 之間插入 n → friend，6 個字母的只有 friend，示範字母也能加在中間。befriend、refried 等列為提示答案；friendly 以 friend 開頭，不能列。" }
-          ]
-        },
-        {
-          "caption": "", "links": [],
-          "blocks": [
-            { "id": "O_MONKEY", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "monkey", "answer": "money", "hints": ["monk", "key", "one", "me", "my"], "why": "獨立題，藍色斜角＝減少字母：monkey 刪掉中間的 k → money，5 個字母的只有 money，示範也能刪中間的字母。monk、key 等列為提示答案。" }
-          ]
-        },
-        {
-          "caption": "", "links": [ { "from": "O_EARTH", "to": "O_HEAR", "kind": "Pointer" }, { "from": "O_HERE", "to": "O_HEAR", "kind": "Bridge" } ],
-          "blocks": [
-            { "id": "O_EARTH", "dx": 0, "dy": 1, "color": "BrightYellow", "shape": "Plain", "clue": "earth", "answer": "heart", "hints": ["hater"], "why": "黃色方角＝重新排列：earth → heart（hater 列為提示答案），箭頭把 heart 往下傳。" },
-            { "id": "O_HEAR", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "", "answer": "hear", "hints": ["heat", "hart", "her", "hat", "ear", "eat", "art", "at"], "why": "箭頭帶來 heart；藍色斜角刪掉 t → hear。heat、hart 同為 4 個字母，列為提示答案，靠右邊與 here 的連接橋鎖定。" },
-            { "id": "O_HERE", "dx": 1, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "here", "answer": "hear", "hints": [], "why": "淺灰方角＝同音：here → hear，與左邊鏈的終點連接，從兩個方向把 hear 釘死，當開放區的收尾。" }
-          ]
-        }
-      ]
     }
-  ]
+  ],
+  "world": {
+    "texts": [
+      "From here on, you're on your own."
+    ],
+    "zones": [
+      {
+        "key": "entrance", "accent": "",
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "O_SILENT", "to": "O_LISTEN", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_SILENT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "silent", "answer": "silent", "hints": [], "why": "白色方角＝原字照寫 silent（既有題，原樣保留），連接橋分享 silent。" },
+              { "id": "O_LISTEN", "dx": 1, "dy": 0, "color": "BrightYellow", "shape": "Plain", "clue": "listen", "answer": "silent", "hints": ["tinsel", "enlist", "inlets"], "why": "與 silent 連接；listen 和 silent 字母完全相同、只換順序 → 推出黃色方角＝重新排列（既有題，原樣保留）。兩字不押韻，也不是一字之差。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "O_PLANET", "to": "O_PLANE", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_PLANET", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "planet", "answer": "planet", "hints": [], "why": "白色方角＝原字照寫 planet（既有題，原樣保留），連接橋分享 planet。" },
+              { "id": "O_PLANE", "dx": 0, "dy": -1, "color": "BrightYellow", "shape": "Beveled", "clue": "plane", "answer": "planet", "hints": ["planes", "planed", "planer", "planned", "planner", "planted", "planter", "airplane", "aeroplane", "seaplane", "biplane", "explained"], "why": "與 planet 連接；plane 在最後加 t → 推出黃色斜角＝加字母（既有題，補齊提示答案）。planets 以 planet 開頭，不能列。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "O_COLD", "to": "O_HAT", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_COLD", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Beveled", "clue": "cold", "answer": "hot", "hints": ["warm", "heated", "boiling", "burning", "fiery", "friendly"], "why": "黑色斜角＝反義詞：cold → hot，3 個字母的只有 hot；warm 等列為提示答案。" },
+              { "id": "O_HAT", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "hat", "answer": "hot", "hints": ["bat", "cat", "eat", "fat", "mat", "oat", "pat", "rat", "sat", "vat", "hit", "hut", "had", "ham", "has", "hay"], "why": "與 cold 的答案 hot 連接；hat 只把 a 換成 o → 推出藍色方角＝換一個字母。hat 和 hot 不押韻也不同音；既是 hat 的一字之差、又是 cold 的反義詞的只有 hot。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "O_TEST", "to": "O_TESTY", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_TEST", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "test", "answer": "test", "hints": [], "why": "白色方角＝原字照寫 test（既有題，原樣保留），連接橋分享 test。" },
+              { "id": "O_TESTY", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "testy", "answer": "test", "hints": ["sty"], "why": "與 test 連接；testy 刪掉 y → 推出藍色斜角＝減少字母（既有題）。原本的提示答案 tey 不是英文字，改成 sty（s、t、y 依序出現在 testy 裡）。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "O_LIZARD", "to": "O_WIZARD", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_LIZARD", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "lizard", "answer": "lizard", "hints": [], "why": "白色方角＝原字照寫 lizard（既有題，原樣保留），連接橋分享 lizard。" },
+              { "id": "O_WIZARD", "dx": 1, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "wizard", "answer": "lizard", "hints": [], "why": "與 lizard 連接；wizard 只把 w 換成 l（既有題，原樣保留）。wizard 和 lizard 也押韻，所以排在乾淨的 hat/hot 之後，當藍色方角的第二個例子。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "O_CASTLE", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Plain", "clue": "castle", "answer": "cattle", "hints": [], "why": "獨立題，藍色方角＝換一個字母：castle 的第 3 個字母 s 換成 t → cattle，是唯一常見的一字之差。放在 lizard/wizard 旁邊，剛推出規則就能套用。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "O_FRIED", "dx": 0, "dy": 0, "color": "BrightYellow", "shape": "Beveled", "clue": "fried", "answer": "friend", "hints": ["befriend", "refried", "frilled", "fringed", "frisked", "frightened", "boyfriend", "girlfriend"], "why": "獨立題，黃色斜角＝加字母：f-r-i-e-d 在 e 和 d 之間插入 n → friend，6 個字母的只有 friend，示範字母也能加在中間。befriend、refried 等列為提示答案；friendly 以 friend 開頭，不能列。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "O_MONKEY", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "monkey", "answer": "money", "hints": ["monk", "key", "one", "me", "my"], "why": "獨立題，藍色斜角＝減少字母：monkey 刪掉中間的 k → money，5 個字母的只有 money，示範也能刪中間的字母。monk、key 等列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "O_EARTH", "to": "O_HEAR", "kind": "Pointer" }, { "from": "O_HERE", "to": "O_HEAR", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "O_EARTH", "dx": 0, "dy": 1, "color": "BrightYellow", "shape": "Plain", "clue": "earth", "answer": "heart", "hints": ["hater"], "why": "黃色方角＝重新排列：earth → heart（hater 列為提示答案），箭頭把 heart 往下傳。" },
+              { "id": "O_HEAR", "dx": 0, "dy": 0, "color": "RoyalBlue", "shape": "Beveled", "clue": "", "answer": "hear", "hints": ["heat", "hart", "her", "hat", "ear", "eat", "art", "at"], "why": "箭頭帶來 heart；藍色斜角刪掉 t → hear。heat、hart 同為 4 個字母，列為提示答案，靠右邊與 here 的連接橋鎖定。" },
+              { "id": "O_HERE", "dx": 1, "dy": 0, "color": "LightGray", "shape": "Plain", "clue": "here", "answer": "hear", "hints": [], "why": "淺灰方角＝同音：here → hear，與左邊鏈的終點連接，從兩個方向把 hear 釘死，當開放區的收尾。" }
+            ]
+          }
+        ]
+      },
+      {
+        "key": "demo", "accent": "RoseRed", "placeholder": true,
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "PH_BIRD", "to": "PH_SPARROW", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "PH_BIRD", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "bird", "answer": "bird", "hints": [], "why": "暫時的示範內容（placeholder，正式題目合併時會移除）。白色方角＝原字照寫 bird，連接橋分享 bird。" },
+              { "id": "PH_SPARROW", "dx": 1, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "sparrow", "answer": "bird", "hints": ["animal", "songbird"], "why": "暫時的示範內容。與 bird 連接；sparrow 往上一層的類別是 bird → 推出玫瑰紅方角＝上位詞。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "PH_FRUIT", "to": "PH_BANANA", "kind": "Bridge" } ],
+            "blocks": [
+              { "id": "PH_FRUIT", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "fruit", "answer": "fruit", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 fruit，連接橋往下分享 fruit。" },
+              { "id": "PH_BANANA", "dx": 0, "dy": -1, "color": "RoseRed", "shape": "Plain", "clue": "banana", "answer": "fruit", "hints": ["food", "plant"], "why": "暫時的示範內容。與 fruit 連接（直向的連接橋）；banana 的上位詞是 fruit。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "PH_TIGER", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "tiger", "answer": "animal", "hints": ["cat", "mammal", "beast", "creature", "predator"], "why": "暫時的示範內容。玫瑰紅方角＝上位詞：tiger → animal；cat、mammal 等也是 tiger 的類別，列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [],
+            "blocks": [
+              { "id": "PH_RED", "dx": 0, "dy": 0, "color": "RoseRed", "shape": "Plain", "clue": "red", "answer": "color", "hints": ["colour", "shade", "hue"], "why": "暫時的示範內容。玫瑰紅方角＝上位詞：red → color；英式拼法 colour 與 shade、hue 列為提示答案（color 不是 colour 的開頭）。" }
+            ]
+          }
+        ]
+      }
+    ],
+    "rooms": [
+      {
+        "key": "demo-room", "accent": "Colorless", "placeholder": true,
+        "gate": {
+          "links": [],
+          "blocks": [
+            { "id": "PH_GATE", "dx": 0, "dy": 0, "color": "PureBlack", "shape": "Plain", "clue": "flow", "answer": "wolf", "hints": [], "why": "暫時的示範內容（門前題目）。黑色方角＝倒過來寫：f-l-o-w → w-o-l-f，解開就開門。" }
+          ]
+        },
+        "groups": [
+          {
+            "caption": "", "links": [ { "from": "PH_STRESSED", "to": "PH_DESSERTS", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "PH_STRESSED", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "stressed", "answer": "stressed", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 stressed，箭頭把 stressed 指給右邊的無色格。" },
+              { "id": "PH_DESSERTS", "dx": 1, "dy": 0, "color": "Colorless", "shape": "Plain", "clue": "desserts", "answer": "PureBlack", "hints": ["BrightYellow"], "why": "暫時的示範內容。無色方角：哪個顏色的方角規則能把指進來的 stressed 變成 desserts？倒過來寫 → PureBlack；重新排列（BrightYellow）也說得通，列為提示答案。" }
+            ]
+          },
+          {
+            "caption": "", "links": [ { "from": "PH_TEST", "to": "PH_BEST", "kind": "Pointer" } ],
+            "blocks": [
+              { "id": "PH_TEST", "dx": 0, "dy": 0, "color": "PureWhite", "shape": "Plain", "clue": "test", "answer": "test", "hints": [], "why": "暫時的示範內容。白色方角＝原字照寫 test，箭頭把 test 指給右邊的無色格。" },
+              { "id": "PH_BEST", "dx": 1, "dy": 0, "color": "Colorless", "shape": "Beveled", "clue": "best", "answer": "LightGray", "hints": [], "why": "暫時的示範內容。無色斜角：哪個顏色的斜角規則能把 test 變成 best？押韻 → LightGray，其他斜角規則都不成立。" }
+            ]
+          }
+        ]
+      }
+    ]
+  }
 }

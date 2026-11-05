@@ -5,7 +5,10 @@ using UnityEngine;
 
 namespace Lexiscript
 {
-    /// <summary>教學房間的出口門：房間裡答對 <see cref="required"/> 題就打開，門上顯示目前進度。</summary>
+    /// <summary>
+    /// 教學房間的出口門與門後房間的門：<see cref="blocks"/> 裡答對 <see cref="required"/> 題就打開，門上顯示目前進度。
+    /// 正式關卡一律要求全部答對（教學門要確定玩家真的學會，門後房間的門只有門前那一道題）。
+    /// </summary>
     [ExecuteAlways]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(BoxCollider2D))]
     public sealed class Door : MonoBehaviour
@@ -54,7 +57,7 @@ namespace Lexiscript
             if (!IsOpen) Refresh();
             if (!IsOpen || !Application.isPlaying) return;
             // 門沿著短邊收起來
-            float t = Mathf.Clamp01((Time.time - openedAt) / OpenSeconds);
+            float t = Ease.InCubic((Time.time - openedAt) / OpenSeconds);
             var size = GetComponent<BoxCollider2D>().size;
             transform.localScale = size.x < size.y ? new Vector3(1, 1 - t, 1) : new Vector3(1 - t, 1, 1);
         }
