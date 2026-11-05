@@ -69,6 +69,7 @@ namespace Lexiscript
                 field.Changed += OnFieldChanged;
                 // TMP 的 <mark> 在世界座標文字上只剩很淡的底色（SDF 邊緣抗鋸齒），選取範圍改用自己的網格
                 selectionMesh = Overlay("Selection", transform, Art.SelectionOrder);
+                if (!TryGetComponent<SolveEffect>(out _)) gameObject.AddComponent<SolveEffect>();
             }
             Refresh();
         }

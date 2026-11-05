@@ -9,7 +9,7 @@ namespace Lexiscript
     /// </summary>
     public sealed class HintLabel : MonoBehaviour
     {
-        const float FadeSpeed = 8f, PaddingX = 28, Height = 52, Top = -96;
+        const float FadeSpeed = 8f, PaddingX = 28, Height = 52, Top = ColorNameLabel.Top - ColorNameLabel.Height - 12;
 
         CanvasGroup group;
         TextMeshProUGUI label;
