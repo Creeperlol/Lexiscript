@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TMPro;
@@ -39,13 +40,16 @@ namespace Lexiscript
 
         public const float DefaultFontSize = 24, MinFontSize = 12, MaxFontSize = 64, FontStep = 2;
         public const int MaxLength = 10000;
-        static readonly Vector2 ExpandedSize = new Vector2(460, 600), MinimizedSize = new Vector2(150, 44);
+        /// <summary>縮小後那顆標籤的寬度；右下角的傳送鈕排在它左邊。</summary>
+        public const float MinimizedWidth = 196;
+        static readonly Vector2 ExpandedSize = new Vector2(460, 600), MinimizedSize = new Vector2(MinimizedWidth, 52);
         const float Margin = 24, ToolbarHeight = 44, Padding = 14, Border = 2, CaretWidth = 2;
         const float BlinkHalfPeriod = 0.53f, MultiClickTime = 0.35f, SaveDelay = 1f;
         const int GripColumns = 10, GripRows = 3;
         const float GripDot = 2, GripPitch = 5, GripAlpha = 0.3f, GripHotAlpha = 0.65f;
-        static readonly Color PageColor = Color.white, ToolbarColor = new Color(0.914f, 0.922f, 0.933f);
-        static readonly Color HoverColor = new Color(0, 0, 0, 0.08f), ActiveColor = new Color(0, 0, 0, 0.2f);
+        // 工具列跟其他介面一樣是深色底、淺金強調；寫字的紙維持白色
+        static readonly Color PageColor = Color.white, ToolbarColor = new Color(0.118f, 0.129f, 0.157f);
+        static readonly Color HoverColor = new Color(1, 1, 1, 0.1f), ActiveColor = HudStyle.WithAlpha(Art.Gold, 0.4f);
 
         /// <summary>沒拖過時展開的位置：右下角離畫面右下角的距離（Canvas 單位）。縮小後一律停在這裡。</summary>
         public static readonly Vector2 DefaultOffset = new Vector2(-Margin, Margin);
@@ -137,9 +141,17 @@ namespace Lexiscript
             toolbar.pivot = new Vector2(0.5f, 1);
             toolbar.offsetMin = new Vector2(Border, -ToolbarHeight - Border);
             toolbar.offsetMax = new Vector2(-Border, -Border);
-            bold = ToolButton(toolbar, "Bold", "<b>B</b>", new Vector2(0, 0.5f), new Vector2(8, 0));
-            underline = ToolButton(toolbar, "Underline", "<u>U</u>", new Vector2(0, 0.5f), new Vector2(48, 0));
-            italic = ToolButton(toolbar, "Italic", "<b><i>I</i></b>", new Vector2(0, 0.5f), new Vector2(88, 0));
+            var accent = Ui.Image("Accent", toolbar, Art.Gold).rectTransform;
+            accent.anchorMin = Vector2.zero;
+            accent.anchorMax = new Vector2(1, 0);
+            accent.pivot = new Vector2(0.5f, 0);
+            accent.offsetMin = Vector2.zero;
+            accent.offsetMax = new Vector2(0, 2);
+            var accentLeft = Ui.Image("AccentLeft", toolbar, Art.Gold).rectTransform;
+            Ui.Place(accentLeft, new Vector2(0, 0.5f), Vector2.zero, new Vector2(4, ToolbarHeight));
+            bold = ToolButton(toolbar, "Bold", "<b>B</b>", new Vector2(0, 0.5f), new Vector2(12, 0));
+            underline = ToolButton(toolbar, "Underline", "<u>U</u>", new Vector2(0, 0.5f), new Vector2(52, 0));
+            italic = ToolButton(toolbar, "Italic", "<b><i>I</i></b>", new Vector2(0, 0.5f), new Vector2(92, 0));
             minimize = ToolButton(toolbar, "Minimize", "—", new Vector2(1, 0.5f), new Vector2(-8, 0));
             opacityField = new OpacityField(this, toolbar);
             grip = DotGrip(toolbar);
@@ -167,19 +179,39 @@ namespace Lexiscript
 
             minimized = Ui.Rect("Minimized", transform).gameObject;
             Ui.Fill((RectTransform)minimized.transform);
-            Ui.Fill(Ui.Image("Border", minimized.transform, Art.Ink).rectTransform);
-            Ui.Fill(Ui.Image("Background", minimized.transform, ToolbarColor).rectTransform, Border, Border, Border, Border);
-            var label = Ui.Text("Label", minimized.transform, 22, Art.Ink);
-            label.alignment = TextAlignmentOptions.Center;
-            label.text = "Notes  ▲";
-            Ui.Fill(label.rectTransform);
+            BuildTab(minimized.transform);
+        }
+
+        /// <summary>縮小後的標籤：跟傳送鈕同一套深色斜切底、左側淺金條、條碼與往上的箭頭。</summary>
+        static void BuildTab(Transform parent)
+        {
+            float w = MinimizedSize.x, h = MinimizedSize.y;
+            var body = Ui.Shape("Body", parent);
+            Ui.Place(body.rectTransform, Vector2.zero, Vector2.zero, MinimizedSize);
+            body.rectTransform.pivot = Vector2.zero;
+            body.Add(HudStyle.Chamfered(new Rect(0, 0, w, h), 12, 0, 0, 0), HudStyle.WithAlpha(Art.Ink, 0.9f));
+            body.Add(Shapes.Rect(Vector2.zero, new Vector2(4, h)), Art.Gold);
+            body.Add(Shapes.Rect(new Vector2(16, 5), new Vector2(w - 16, 7)), HudStyle.WithAlpha(Art.Gold, 0.55f));
+            body.AddAll(HudStyle.Barcode(new Vector2(w - 70, 14), 8, "21312", 2), HudStyle.WithAlpha(Art.Paper, 0.35f));
+            var arrow = new Vector2(w - 26, h / 2 + 1);
+            body.Add(new List<Vector2> { arrow + new Vector2(-8, -4), arrow + new Vector2(8, -4), arrow + new Vector2(0, 5) }, Art.Gold);
+            // 三條橫線的筆記本圖示
+            for (int i = 0; i < 3; i++)
+                body.Add(Shapes.Rect(new Vector2(20, h / 2 - 7 + i * 6), new Vector2(i == 0 ? 30 : 36, h / 2 - 5 + i * 6)), Art.Paper);
+            var label = Ui.Text("Label", parent, 20, Art.Paper);
+            label.font = Fonts.Display;
+            label.characterSpacing = 14;
+            label.alignment = TextAlignmentOptions.MidlineLeft;
+            label.text = "NOTES";
+            Ui.Place(label.rectTransform, Vector2.zero, new Vector2(48, 0), new Vector2(w - 90, h));
+            label.rectTransform.pivot = Vector2.zero;
         }
 
         Button ToolButton(Transform toolbar, string name, string label, Vector2 anchor, Vector2 position)
         {
             var background = Ui.Image(name, toolbar, Color.clear);
             Ui.Place(background.rectTransform, anchor, position, new Vector2(36, 34));
-            var caption = Ui.Text("Label", background.transform, 24, Art.Ink);
+            var caption = Ui.Text("Label", background.transform, 24, Art.Paper);
             caption.alignment = TextAlignmentOptions.Center;
             caption.text = label;
             Ui.Fill(caption.rectTransform);
@@ -216,7 +248,7 @@ namespace Lexiscript
                 for (int column = 0; column < GripColumns; column++)
                 {
                     var min = new Vector2(column * GripPitch, row * GripPitch) - size / 2;
-                    shape.Add(Shapes.Rect(min, min + new Vector2(GripDot, GripDot)), Art.Ink);
+                    shape.Add(Shapes.Rect(min, min + new Vector2(GripDot, GripDot)), Art.Paper);
                 }
             shape.color = new Color(1, 1, 1, GripAlpha);
             return shape;

@@ -128,8 +128,8 @@ namespace Lexiscript
             Block Find(string id) => board.Blocks.Single(block => block.name == id);
 
             // 打出提示答案讓提示句出現，再指著名稱最長的顏色之一，畫面正上方的兩個標籤同時出現
-            yield return input.Click(Find("P"));
-            input.Type("everlasting");
+            yield return input.Click(Find("SPOON"));
+            input.Type("noon");
             input.Point(InputHarness.Screen((Vector2)Find("Y").transform.position + new Vector2(0, 0.9f)));
             yield return new WaitForSeconds(0.3f);
             Assert.AreEqual("BrightYellow", hud.ColorLabel.ColorName);

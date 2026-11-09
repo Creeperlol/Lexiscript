@@ -26,6 +26,10 @@ namespace Lexiscript
             /// <summary>打開的暴雷條所屬方塊的 id。</summary>
             public string[] spoilers = new string[0];
             public Vector2 player;
+            /// <summary>走到過大地圖（右下角的傳送鈕從這之後才出現）。</summary>
+            public bool worldReached;
+            /// <summary>第一次過橋的演出已經播過。</summary>
+            public bool bridgeIntroPlayed;
         }
 
         const int Version = 1;
@@ -47,6 +51,30 @@ namespace Lexiscript
         bool discarded;
 
         static string FilePath => StoragePath ?? Path.Combine(Application.persistentDataPath, "progress.json");
+
+        /// <summary>目前場景的進度；Demo 這類沒有存檔的場景是 null。</summary>
+        public static GameProgress Current { get; private set; }
+
+        public bool WorldReached
+        {
+            get => state != null && state.worldReached;
+            set => SetFlag(value, state == null || state.worldReached == value, () => state.worldReached = value);
+        }
+
+        public bool BridgeIntroPlayed
+        {
+            get => state != null && state.bridgeIntroPlayed;
+            set => SetFlag(value, state == null || state.bridgeIntroPlayed == value, () => state.bridgeIntroPlayed = value);
+        }
+
+        void SetFlag(bool value, bool unchanged, Action apply)
+        {
+            if (unchanged) return;
+            apply();
+            ScheduleSave();
+        }
+
+        void Awake() => Current = this;
 
         /// <summary>清掉遊戲進度與筆記（設定保留），回到標題畫面；沒有標題畫面時重新載入目前的場景。</summary>
         public static void ResetAll()
@@ -73,6 +101,11 @@ namespace Lexiscript
             var saved = Load();
             if (saved != null) Restore(saved);
             state = Capture();
+            if (saved != null)
+            {
+                state.worldReached = saved.worldReached;
+                state.bridgeIntroPlayed = saved.bridgeIntroPlayed;
+            }
             board.Solved += OnBlockChanged;
             board.RevealChanged += OnBlockChanged;
             foreach (var spoiler in spoilers) spoiler.Opened += OnChanged;
@@ -90,7 +123,11 @@ namespace Lexiscript
 
         void OnApplicationQuit() => SavePending();
 
-        void OnDestroy() => SavePending();
+        void OnDestroy()
+        {
+            SavePending();
+            if (Current == this) Current = null;
+        }
 
         void Restore(SaveData saved)
         {
@@ -134,7 +171,10 @@ namespace Lexiscript
 
         void OnChanged()
         {
+            bool reached = state.worldReached, played = state.bridgeIntroPlayed;
             state = Capture();
+            state.worldReached = reached;
+            state.bridgeIntroPlayed = played;
             ScheduleSave();
         }
 

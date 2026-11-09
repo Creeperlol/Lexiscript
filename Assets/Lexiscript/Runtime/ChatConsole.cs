@@ -39,9 +39,12 @@ namespace Lexiscript
         static readonly Color LineColor = new Color(0, 0, 0, 0.45f), InputColor = new Color(0, 0, 0, 0.6f);
         const string FeedbackColor = "#FFE066", ErrorColor = "#FF8A80";
 
-        static readonly Dictionary<string, Action<ChatConsole>> Commands = new Dictionary<string, Action<ChatConsole>>
+        /// <summary>測試用的指令；/devhelp 依這個順序列出來。</summary>
+        static readonly (string name, string description, Action<ChatConsole> run)[] Commands =
         {
-            { "/showanswer", console => console.ShowAnswer() },
+            ("/showanswer", "Show the answer of the nearest visible block.", console => console.ShowAnswer()),
+            ("/refreshanimation", "Play the bridge intro again the next time you cross it.", console => console.RefreshAnimation()),
+            ("/devhelp", "List every command and what it does.", console => console.DevHelp()),
         };
 
         readonly TextEditBuffer input = new TextEditBuffer(TextEditBuffer.Printable, MaxInput);
@@ -191,7 +194,8 @@ namespace Lexiscript
             TextFocus.Release(this);
             if (text.Length == 0) return;
             if (sent.Count == 0 || sent[sent.Count - 1] != text) sent.Add(text);
-            if (Commands.TryGetValue(text, out var command)) command(this);
+            var command = Commands.FirstOrDefault(entry => entry.name == text);
+            if (command.run != null) command.run(this);
             else Post(text);
         }
 
@@ -211,6 +215,17 @@ namespace Lexiscript
         }
 
         void Scroll(int step) => scrolledLines = Mathf.Clamp(scrolledLines + step, 0, Mathf.Max(0, messages.Count - 1));
+
+        void RefreshAnimation()
+        {
+            if (WorldEntry.Refresh()) Post("The bridge intro will play again the next time you cross the bridge.", FeedbackColor);
+            else Post("There is no bridge in this scene.", ErrorColor);
+        }
+
+        void DevHelp()
+        {
+            foreach (var (name, description, _) in Commands) Post($"{name}  -  {description}", FeedbackColor);
+        }
 
         void ShowAnswer()
         {

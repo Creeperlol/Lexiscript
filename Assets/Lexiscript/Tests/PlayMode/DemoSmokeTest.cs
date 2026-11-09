@@ -70,9 +70,7 @@ namespace Lexiscript
             Assert.AreEqual("Eternal", board.Field.Text);
             Assert.AreEqual("Eternal", board.Puzzle.Input("P"), "輸入照玩家打的大小寫");
             Assert.IsFalse(board.Puzzle.IsSolved("P"));
-            CollectionAssert.Contains(Board.HintPhrases, board.HintPhrase);
-            yield return new WaitForSeconds(0.2f);
-            Assert.AreEqual(board.HintPhrase, Hud.Instance.Hint.Phrase, "提示句顯示在畫面上方");
+            Assert.AreEqual("", board.HintPhrase, "鏈頭打中途的近義詞不跳提示");
             InputHarness.Shot("02_chain_typing", new Vector2(5f, 20f), 3.4f, hud: true);
 
             y0 = body.position.y;
@@ -122,11 +120,15 @@ namespace Lexiscript
             Assert.IsNull(board.Focused, "答錯按 Enter 離開");
             Assert.AreEqual("B________(9)", Shown(p), "回到聚焦前的字首提示");
 
-            yield return input.Click(p);
-            input.Type("eternal");
+            var spoon = Find("SPOON");
+            yield return input.Click(spoon);
+            input.Type("noon");
+            CollectionAssert.Contains(Board.HintPhrases, board.HintPhrase);
+            yield return new WaitForSeconds(0.2f);
+            Assert.AreEqual(board.HintPhrase, Hud.Instance.Hint.Phrase, "提示句顯示在畫面上方");
             yield return input.Tap(Key.Enter);
             Assert.IsNull(board.Focused);
-            Assert.AreEqual("", board.Puzzle.Input("P"), "打的是提示答案也一樣清掉");
+            Assert.AreEqual("", board.Puzzle.Input("SPOON"), "打的是提示答案也一樣清掉");
             CollectionAssert.Contains(Board.HintPhrases, board.HintPhrase, "提示句多留一下，打完直接按 Enter 也看得到");
             yield return new WaitForSeconds(Board.HintLingerSeconds + 0.2f);
             Assert.AreEqual("", board.HintPhrase);

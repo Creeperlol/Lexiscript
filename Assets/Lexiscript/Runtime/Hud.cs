@@ -5,7 +5,7 @@ using UnityEngine.UI;
 namespace Lexiscript
 {
     /// <summary>
-    /// 畫面上的介面：左上角的總答題數、正上方的顏色名稱與提示句、右上角的設定、右下角的筆記、左下角的聊天列，
+    /// 畫面上的介面：左上角的總答題數、正上方的顏色名稱與提示句、右上角的設定、右下角的筆記與傳送鈕、左下角的聊天列，
     /// 全部在執行時用程式建立。鍵盤則由同物件上的 <see cref="TextInputHub"/> 分派給目前的打字焦點。
     /// </summary>
     [RequireComponent(typeof(TextInputHub))]
@@ -31,6 +31,7 @@ namespace Lexiscript
         public NotesPanel Notes { get; private set; }
         public ChatConsole Chat { get; private set; }
         public SettingsMenu Settings { get; private set; }
+        public TeleportMenu Teleport { get; private set; }
 
         /// <summary>介面用的字型：有系統中文字型就用它，否則退回 TMP 預設字型。</summary>
         public static TMP_FontAsset UiFont
@@ -64,6 +65,7 @@ namespace Lexiscript
             Hint = Ui.Add<HintLabel>("Hint", Root);
             Chat = Ui.Add<ChatConsole>("Chat", Root);
             Notes = Ui.Add<NotesPanel>("Notes", Root);
+            Teleport = Ui.Add<TeleportMenu>("Teleport", Root);
             // 設定視窗要蓋住其他所有介面，所以最後建
             Settings = Ui.Add<SettingsMenu>("Settings", Root);
         }
@@ -83,7 +85,7 @@ namespace Lexiscript
         /// <summary>滑鼠在介面上：世界的點擊、顏色名稱與滾輪縮放都要讓給介面。</summary>
         public static bool IsPointerOverUi(Vector2 screen) =>
             ModalOpen || (Instance != null && (Instance.Notes.Covers(screen) || Instance.Chat.Covers(screen) || Instance.Settings.Covers(screen)
-                || Instance.Counter.Covers(screen)));
+                || Instance.Counter.Covers(screen) || Instance.Teleport.Covers(screen)));
 
         public static bool ConsumesScroll(Vector2 screen) =>
             ModalOpen || (Instance != null && (Instance.Notes.WantsScroll(screen) || Instance.Chat.WantsScroll(screen)));

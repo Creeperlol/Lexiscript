@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ namespace Lexiscript
 {
     /// <summary>
     /// 門還沒開的房間上方的遮罩（平面設計的屋頂）：看不到裡面，裡面的方塊也不能點、不顯示顏色名稱。
-    /// <see cref="door"/> 打開時從門那一側往內擦除；讀檔時直接開門（<see cref="Door.Opened"/> 帶 true）就立刻消失。
+    /// <see cref="doors"/> 任何一扇打開時，從那扇門的一側往內擦除；讀檔時直接開門（<see cref="Door.Opened"/> 帶 true）就立刻消失。
     /// 遮罩只在執行時畫，編輯模式的場景裡看得到房間內容。
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -19,9 +20,21 @@ namespace Lexiscript
         /// <summary>遮住的範圍（世界座標），物件本身擺在它的中心。只蓋地板，牆和門留在外面看得見。</summary>
         public Rect area;
 
-        /// <summary>打開後遮罩就收起來的那扇門。</summary>
-        public Door door;
+        /// <summary>通往這個房間的門，任何一扇打開遮罩就收起來；第一扇是主要入口，標誌畫在靠它的那一側。</summary>
+        public Door[] doors = new Door[0];
 
+        /// <summary>畫鎖；同一間房的走道、側間、橋只蓋屋頂，鎖畫在主要那塊地板上就好。</summary>
+        public bool locked = true;
+
+        /// <summary>
+        /// 同一間房所有遮罩合起來的範圍（世界座標）。擦除的方向與進度依它來算，房間分成好幾塊時才會一路連貫地掀開；
+        /// 寬度是 0 時就用 <see cref="area"/>。
+        /// </summary>
+        public Rect frame;
+
+        Rect Frame => frame.width > 0 ? frame : area;
+
+        readonly List<(Door door, Action<bool> opened)> subscriptions = new List<(Door, Action<bool>)>();
         Mesh mesh;
         Vector2 inward, emblem;
         bool revealing;
@@ -42,7 +55,7 @@ namespace Lexiscript
         }
 
         bool Conceals(Vector2 world) =>
-            Covering && area.Contains(world) && Art.CoverRemains(area.size, inward, wipe, world - area.center);
+            Covering && area.Contains(world) && Art.CoverRemains(Frame.size, inward, wipe, world - Frame.center);
 
         void OnEnable()
         {
@@ -52,12 +65,16 @@ namespace Lexiscript
                 mesh = new Mesh { hideFlags = HideFlags.DontSave };
                 GetComponent<MeshFilter>().sharedMesh = mesh;
             }
-            var doorway = door != null ? (Vector2)door.transform.position - area.center : Vector2.left * area.width;
-            inward = Art.CoverInward(area.size, doorway);
+            var main = doors.Length > 0 ? doors[0] : null;
+            Aim(main);
+            var doorway = main != null ? (Vector2)main.transform.position - area.center : Vector2.left * area.width;
             emblem = Art.CoverEmblem(area.size, inward, doorway);
-            if (door != null)
+            foreach (var door in doors)
             {
-                door.Opened += OnOpened;
+                if (door == null) continue;
+                Action<bool> opened = instant => OnOpened(door, instant);
+                door.Opened += opened;
+                subscriptions.Add((door, opened));
                 if (door.IsOpen) Progress = 1;
             }
             Draw();
@@ -66,7 +83,8 @@ namespace Lexiscript
         void OnDisable()
         {
             covers.Remove(this);
-            if (door != null) door.Opened -= OnOpened;
+            foreach (var (door, opened) in subscriptions) door.Opened -= opened;
+            subscriptions.Clear();
         }
 
         void OnDestroy()
@@ -74,8 +92,19 @@ namespace Lexiscript
             if (mesh != null) Destroy(mesh);
         }
 
-        void OnOpened(bool instant)
+        /// <summary>從這扇門那一側往內收；沒有門時當作在左邊。</summary>
+        void Aim(Door door)
         {
+            var frame = Frame;
+            var doorway = door != null ? (Vector2)door.transform.position - frame.center : Vector2.left * frame.width;
+            inward = Art.CoverInward(frame.size, doorway);
+        }
+
+        void OnOpened(Door door, bool instant)
+        {
+            // 另一扇門已經開始掀開了，就照原本的方向收完
+            if (revealing || !Covering) return;
+            Aim(door);
             if (instant)
             {
                 Progress = 1;
@@ -97,7 +126,7 @@ namespace Lexiscript
         {
             wipe = Ease.InOutCubic(Progress);
             var builder = new MeshBuilder();
-            if (Covering) Art.Cover(builder, area.size, inward, emblem, wipe);
+            if (Covering) Art.Cover(builder, area.size, inward, emblem, wipe, locked, area.center, Frame);
             builder.Apply(mesh);
         }
     }

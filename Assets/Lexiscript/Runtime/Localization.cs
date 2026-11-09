@@ -35,6 +35,8 @@ namespace Lexiscript
             { "Bridges still mean: same answer on both sides.", "橋的意思不變：兩邊的答案相同。" },
             { "One gray block has no bridge. Trust your ears!", "有一格灰色沒有橋，相信你的耳朵！" },
             { "From here on, you're on your own.", "接下來，就靠你自己了。" },
+            { "A solid block has no blank to fill.", "純色方塊沒有空格可以填。" },
+            { "Its answer goes back to where the arrows began.", "它的答案會回到箭頭出發的那一格。" },
             { "Click to reveal the answer.", "點一下顯示答案。" },
         };
 

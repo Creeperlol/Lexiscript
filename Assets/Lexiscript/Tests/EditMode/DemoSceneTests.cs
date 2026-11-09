@@ -66,6 +66,7 @@ namespace Lexiscript
         public void CellKindsHaveTheirIncomingLinks()
         {
             LevelChecks.CellKindsHaveTheirIncomingLinks(blocks);
+            LevelChecks.ChainsIntoSolidBlocksDoNotHintTheirMiddleWords(blocks);
         }
 
         [Test]
@@ -75,7 +76,8 @@ namespace Lexiscript
             Assert.AreEqual((BlockColor.PureWhite, BlockShape.Beveled), (p.color, p.shape));
             Assert.AreEqual("perpetual", p.clue);
             Assert.AreEqual("Byzantium", p.answer);
-            CollectionAssert.Contains(p.hintAnswers, "constant");
+            // 鏈尾是純色格時答案和題目字面上無關，近義詞提示會把玩家引到錯的方向
+            Assert.IsEmpty(p.hintAnswers);
 
             foreach (var id in new[] { "L", "Y" })
                 Assert.IsTrue(string.IsNullOrEmpty(Find(id).clue) && Find(id).answer.Length > 0, id);

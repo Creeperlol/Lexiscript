@@ -103,14 +103,41 @@ namespace Lexiscript
             }
         }
 
+        /// <summary>
+        /// 鏈尾是純色格時，最後的結果回到鏈頭作答，和題目字面上無關；鏈頭若把中途的詞列為提示答案，
+        /// 玩家打出中途的詞會跳「方向對了」，被引到錯的方向。
+        /// </summary>
+        public static void ChainsIntoSolidBlocksDoNotHintTheirMiddleWords(Block[] blocks)
+        {
+            var pointers = Links(blocks).Where(x => x.link.kind != LinkKind.Bridge).ToList();
+            foreach (var end in blocks.Where(block => block.IsPure))
+            {
+                var chain = new HashSet<Block>();
+                var frontier = new Queue<Block>(new[] { end });
+                while (frontier.Count > 0)
+                {
+                    var current = frontier.Dequeue();
+                    foreach (var from in pointers.Where(x => x.link.target == current).Select(x => x.from))
+                        if (chain.Add(from)) frontier.Enqueue(from);
+                }
+                var heads = chain.Where(block => !string.IsNullOrEmpty(block.clue)).ToList();
+                Assert.IsNotEmpty(heads, $"{end.name} 的鏈沒有起點");
+                var middle = chain.Concat(blocks.Where(block => heads.Any(head => head.links.Any(link => link.target == block))))
+                    .Where(block => !heads.Contains(block) && !string.IsNullOrEmpty(block.answer))
+                    .Select(block => block.answer.ToLowerInvariant()).ToList();
+                foreach (var head in heads)
+                    Assert.IsFalse(head.hintAnswers.Any(hint => middle.Contains(hint.ToLowerInvariant())), $"{head.name} 把中途的詞列成提示答案");
+            }
+        }
+
         public static void EverythingIsInsideTheRooms(Rooms rooms, Block[] blocks, Player player)
         {
             CollectionAssert.AllItemsAreUnique(blocks.Select(block => block.name));
             foreach (var block in blocks)
             {
-                Vector2 c = block.transform.position;
-                Assert.IsTrue(rooms.floors.Any(floor => c.x - Art.Half >= floor.xMin && c.x + Art.Half <= floor.xMax
-                    && c.y - Art.Half >= floor.yMin && c.y + Art.Half <= floor.yMax), block.name);
+                // 房間不全是長方形，地板拆成好幾塊；方塊可以跨在同一間房相鄰的兩塊上
+                var square = new Rect((Vector2)block.transform.position - Vector2.one * Art.Half, Vector2.one * 2 * Art.Half);
+                Assert.IsFalse(Shapes.Subtract(square, rooms.floors).Any(), block.name);
             }
             foreach (var a in blocks)
                 foreach (var b in blocks)
@@ -153,7 +180,7 @@ namespace Lexiscript
         public static void DoorwaysAreClear(Rooms rooms, IEnumerable<Block> blocks)
         {
             const float depth = 2.5f, margin = 0.3f;
-            var bounds = blocks.Select(block => (block.name, rect: Bounds(block))).ToList();
+            var bounds = blocks.Select(block => (block.name, rect: Bounds(block))).Concat(rooms.obstacles.Select(rect => ("擺設", rect))).ToList();
             foreach (var d in rooms.doorways)
             {
                 // 直的門口開在左右兩間之間，橫的門口開在上下兩間之間
@@ -185,13 +212,14 @@ namespace Lexiscript
                     for (int y = Mathf.Max(0, Mathf.FloorToInt((area.yMin - origin.y) / step)); y < height && At(0, y).y <= area.yMax; y++)
                         if (area.Contains(At(x, y))) inside[x, y] = true;
             var blocked = new bool[width, height];
-            float reach = Art.Half + Art.PlayerHalf;
-            foreach (var block in blocks)
+            // 方塊與擋路的擺設都往外擴一個角色半徑，角色中心不能進到裡面
+            var solids = blocks.Select(Bounds).Concat(rooms.obstacles);
+            foreach (var solid in solids)
             {
-                Vector2 c = block.transform.position;
-                for (int x = Mathf.Max(0, Mathf.FloorToInt((c.x - reach - origin.x) / step)); x < width && At(x, 0).x <= c.x + reach; x++)
-                    for (int y = Mathf.Max(0, Mathf.FloorToInt((c.y - reach - origin.y) / step)); y < height && At(0, y).y <= c.y + reach; y++)
-                        if (Mathf.Abs(At(x, y).x - c.x) < reach && Mathf.Abs(At(x, y).y - c.y) < reach) blocked[x, y] = true;
+                var grown = new Rect(solid.position - Vector2.one * Art.PlayerHalf, solid.size + Vector2.one * 2 * Art.PlayerHalf);
+                for (int x = Mathf.Max(0, Mathf.FloorToInt((grown.xMin - origin.x) / step)); x < width && At(x, 0).x <= grown.xMax; x++)
+                    for (int y = Mathf.Max(0, Mathf.FloorToInt((grown.yMin - origin.y) / step)); y < height && At(0, y).y <= grown.yMax; y++)
+                        if (grown.xMin < At(x, y).x && At(x, y).x < grown.xMax && grown.yMin < At(x, y).y && At(x, y).y < grown.yMax) blocked[x, y] = true;
             }
             // 角色的四個角都要在地板或門口裡
             int k = Mathf.CeilToInt(Art.PlayerHalf / step);

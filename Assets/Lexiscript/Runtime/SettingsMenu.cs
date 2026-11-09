@@ -9,7 +9,7 @@ namespace Lexiscript
     /// <summary>
     /// 右上角的設定鈕與設定視窗。設定鈕平常看不到，滑鼠靠近右上角才淡入，滑過時齒輪轉一格；
     /// 點開後是蓋住整個畫面的視窗：開著時 <see cref="Hud.ModalOpen"/>，並拿走打字焦點擋住打字與移動，
-    /// Esc、點視窗外或關閉鈕關閉。內容依序是語言、總答題數顯示、玩家外觀，最下面是要再確認一次的重置進度。
+    /// Esc、點視窗外或關閉鈕關閉。內容依序是語言、總答題數顯示、玩家外觀、返回主畫面，最下面是要再確認一次的重置進度。
     /// 設定介面跟教學地板說明是遊戲裡唯二會換語言的文字。
     /// </summary>
     // 同一下點擊不能同時按到後面的東西，所以點擊分兩段處理。按設定鈕在 Update，排在筆記（100）之前：
@@ -66,10 +66,10 @@ namespace Lexiscript
             public float Top;
         }
 
-        static readonly Vector2 PanelSize = new Vector2(820, 644), DialogSize = new Vector2(700, 300);
+        static readonly Vector2 PanelSize = new Vector2(820, 740), DialogSize = new Vector2(700, 300);
         static readonly Vector2 GearSize = new Vector2(60, 60), GearZoneSize = new Vector2(320, 240);
         const float GearMargin = 22, GearTurn = 45, GearSlide = 16;
-        const float PadX = 44, NameX = PadX + 64, FirstRowTop = 184, RowHeight = 96, ResetRowTop = 516;
+        const float PadX = 44, NameX = PadX + 64, FirstRowTop = 184, RowHeight = 96, TitleRowTop = FirstRowTop + 3 * RowHeight, ResetRowTop = 612;
         const float ControlWidth = 300, ControlHeight = 48, ResetWidth = 220, IndicatorInset = 4;
         const float GearInSeconds = 0.18f, GearOutSeconds = 0.3f, TurnSeconds = 0.35f, HoverSeconds = 0.12f, IndicatorSeconds = 0.24f;
         const float OpenSeconds = 0.36f, CloseSeconds = 0.18f, ConfirmInSeconds = 0.28f, ConfirmOutSeconds = 0.14f;
@@ -89,7 +89,7 @@ namespace Lexiscript
         RectTransform window, decor, panel, accent, confirm, dialog;
         CanvasGroup gearGroup, windowGroup, confirmGroup;
         UiShape gearIconShape, closeIcon;
-        Button close, reset, cancel, confirmButton;
+        Button close, reset, cancel, confirmButton, titleButton;
         Label title;
         Vector2 pointer;
         bool pointing;
@@ -105,6 +105,7 @@ namespace Lexiscript
         public RectTransform Panel => panel;
         public RectTransform CloseButton => close.Rect;
         public RectTransform ResetButton => reset.Rect;
+        public RectTransform TitleButton => titleButton.Rect;
         public RectTransform CancelButton => cancel.Rect;
         public RectTransform ConfirmButton => confirmButton.Rect;
         public TMP_Text Title => title.Text;
@@ -112,6 +113,12 @@ namespace Lexiscript
 
         /// <summary>確認重置後執行的動作；測試換掉它，以免真的清掉進度、切換場景。</summary>
         public Action ResetProgress { get; set; } = GameProgress.ResetAll;
+
+        /// <summary>按返回主畫面後執行的動作；進度在離開場景時自動存檔。測試換掉它，以免真的切換場景。</summary>
+        public Action ReturnToTitle { get; set; } = () =>
+        {
+            if (Application.CanStreamedLevelBeLoaded("Title")) TitleTransition.Play("Title");
+        };
 
         /// <summary>二選一設定列的選項（row 用 <see cref="LanguageRow"/> 等常數，option 是左 0 右 1）。</summary>
         public RectTransform Option(int row, int option) => choices[row].Options[option].Rect;
@@ -223,6 +230,11 @@ namespace Lexiscript
             {
                 SetConfirming(true);
             }
+            else if (Ui.Contains(titleButton.Rect, screen))
+            {
+                Close();
+                ReturnToTitle();
+            }
             else
             {
                 foreach (var choice in choices)
@@ -283,6 +295,8 @@ namespace Lexiscript
             }
             Hover(close, interactive);
             closeIcon.color = Color.Lerp(Art.Paper, Art.Gold, Ease.OutCubic(close.Hover));
+            Hover(titleButton, interactive);
+            titleButton.Label.Text.color = Color.Lerp(Art.Paper, Art.Ink, Ease.OutCubic(titleButton.Hover));
             Hover(reset, interactive);
             reset.Label.Text.color = Color.Lerp(HudStyle.Danger, Art.Paper, Ease.OutCubic(reset.Hover));
 
@@ -374,7 +388,7 @@ namespace Lexiscript
             body.AddAll(HudStyle.Barcode(P(w - 330, 34), 12, "21312113121231", 3), HudStyle.WithAlpha(Art.Paper, 0.3f));
             body.Add(Shapes.Rect(P(PadX, 165), P(w - PadX, 163)), Line);
             body.Add(Shapes.Rect(P(PadX, 166), P(PadX + 72, 162)), Art.Gold);
-            for (int k = 1; k < 3; k++)
+            for (int k = 1; k < 4; k++)
                 body.AddAll(HudStyle.Dashes(P(PadX, FirstRowTop + k * RowHeight), w - 2 * PadX, 1, 8, 6), HudStyle.WithAlpha(Art.Paper, 0.12f));
             float band = ResetRowTop - 30;
             body.AddAll(HudStyle.Hatch(Shapes.Rect(P(PadX, band + 12), P(w - PadX, band)), 12, 5), HudStyle.WithAlpha(HudStyle.Danger, 0.55f));
@@ -413,8 +427,18 @@ namespace Lexiscript
                 () => GameSettings.PlayerStyle == PlayerStyle.Square ? 1 : 0,
                 option => GameSettings.PlayerStyle = option == 1 ? PlayerStyle.Square : PlayerStyle.Pixel);
 
+            var titleRow = AddRow(content, TitleRowTop);
+            RowHeader(titleRow, 4, Art.Gold, "BACK TO TITLE", "返回主畫面",
+                "Leave to the title screen. Your progress is saved.", "回到遊戲主畫面，進度會自動保存。", w - NameX - PadX - ResetWidth - 24);
+            titleButton = new Button { Rect = At(Ui.Rect("Title", titleRow), w - PadX - ResetWidth, (RowHeight - ControlHeight) / 2, ResetWidth, ControlHeight) };
+            var titleOutline = Box(0, 0, ResetWidth, ControlHeight);
+            Shape("Frame", titleButton.Rect, 0, 0, ResetWidth, ControlHeight).AddAll(HudStyle.Frame(titleOutline, 10, 0, 10, 0, 2), HudStyle.WithAlpha(Art.Paper, 0.3f));
+            titleButton.Fill = Shape("Hover", titleButton.Rect, 0, 0, ResetWidth, ControlHeight);
+            titleButton.Fill.Add(HudStyle.Chamfered(titleOutline, 10, 0, 10, 0), Art.Gold);
+            titleButton.Label = AddLabel(titleButton.Rect, 0, 0, ResetWidth, ControlHeight, 19, Art.Paper, TextAlignmentOptions.Center, "TITLE", "主畫面", 10, 4, true);
+
             var resetRow = AddRow(content, ResetRowTop);
-            RowHeader(resetRow, 4, HudStyle.Danger, "RESET PROGRESS", "重置進度",
+            RowHeader(resetRow, 5, HudStyle.Danger, "RESET PROGRESS", "重置進度",
                 "Erase all game progress and notes. Settings are kept.", "清除所有遊戲進度與筆記，設定會保留。", w - NameX - PadX - ResetWidth - 24);
             reset = new Button { Rect = At(Ui.Rect("Reset", resetRow), w - PadX - ResetWidth, (RowHeight - ControlHeight) / 2, ResetWidth, ControlHeight) };
             var outline = Box(0, 0, ResetWidth, ControlHeight);

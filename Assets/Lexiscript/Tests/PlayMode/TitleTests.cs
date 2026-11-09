@@ -159,7 +159,7 @@ namespace Lexiscript
         /// 標題與轉場的介面是 Overlay Canvas，不會進 render request：拍照前暫時改成跟著鏡頭的 Canvas，
         /// 並讓鏡頭先畫到截圖大小的貼圖上，介面與箭頭才會照截圖的比例排版。
         /// </summary>
-        static IEnumerator Shot(string name, params Canvas[] canvases)
+        internal static IEnumerator Shot(string name, params Canvas[] canvases)
         {
             var camera = Camera.main;
             var target = new RenderTexture(1920, 1080, 24);

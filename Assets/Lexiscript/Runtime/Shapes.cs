@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Lexiscript
@@ -90,6 +91,31 @@ namespace Lexiscript
             a -= along;
             b += along;
             return new List<Vector2> { a - side, b - side, b + side, a + side };
+        }
+
+        /// <summary>rect 扣掉 holes 之後剩下的幾塊長方形。</summary>
+        public static IEnumerable<Rect> Subtract(Rect rect, IEnumerable<Rect> holes)
+        {
+            var pieces = new List<Rect> { rect };
+            foreach (var hole in holes)
+            {
+                var next = new List<Rect>();
+                foreach (var piece in pieces)
+                {
+                    if (!piece.Overlaps(hole))
+                    {
+                        next.Add(piece);
+                        continue;
+                    }
+                    float yMin = Mathf.Max(piece.yMin, hole.yMin), yMax = Mathf.Min(piece.yMax, hole.yMax);
+                    if (hole.yMax < piece.yMax) next.Add(UnityEngine.Rect.MinMaxRect(piece.xMin, hole.yMax, piece.xMax, piece.yMax));
+                    if (hole.yMin > piece.yMin) next.Add(UnityEngine.Rect.MinMaxRect(piece.xMin, piece.yMin, piece.xMax, hole.yMin));
+                    if (hole.xMin > piece.xMin) next.Add(UnityEngine.Rect.MinMaxRect(piece.xMin, yMin, hole.xMin, yMax));
+                    if (hole.xMax < piece.xMax) next.Add(UnityEngine.Rect.MinMaxRect(hole.xMax, yMin, piece.xMax, yMax));
+                }
+                pieces = next;
+            }
+            return pieces.Where(piece => piece.width > 1e-4f && piece.height > 1e-4f);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Lexiscript
@@ -29,11 +30,16 @@ namespace Lexiscript
         const float BracketGap = 24, BracketLength = 30, BracketWidth = 4;
         const float ArrowGap = 18, ArrowRise = 150, ArrowRun = 120, LineWidth = 5;
         const float TagGap = 340, TagHeight = 64, TagPadding = 28, TagCut = 14;
+        // 離開遊戲的按鈕：右下角版權字上方，跟左下的斜紋條同一條水平線
+        const float QuitWidth = 208, QuitHeight = 48, QuitBottom = 92, QuitCut = 12, HoverSeconds = 0.12f;
 
         readonly RectTransform root, wordmarkMask;
         readonly UiShape decor, pointer, overlay;
         readonly TextMeshProUGUI backdrop, spine, terminal, serial, sector, kicker, wordmark, subtitle;
-        readonly TextMeshProUGUI cell, kind, length, instruction, status, copyright;
+        readonly TextMeshProUGUI cell, kind, length, instruction, status, copyright, quitLabel;
+        readonly RectTransform quit;
+        readonly UiShape quitShape;
+        float quitHover;
         readonly float wordmarkWidth, instructionWidth, chipStart, chipEnd;
         float statusWidth;
         (Vector2 size, Vector2 block, float unit) drawn;
@@ -41,6 +47,9 @@ namespace Lexiscript
         Vector2 tip;
 
         public Canvas Canvas { get; }
+
+        /// <summary>離開遊戲的按鈕；滑鼠點擊由 <see cref="TitleScreen"/> 判斷。</summary>
+        public RectTransform QuitButton => quit;
 
         /// <summary>箭頭尖端目前的螢幕座標。</summary>
         public Vector2 TipScreen => RectTransformUtility.WorldToScreenPoint(UiCamera, root.TransformPoint(tip));
@@ -69,7 +78,7 @@ namespace Lexiscript
             terminal = Label("Terminal", "LEXISCRIPT.TERMINAL", 19, 5, TextAlignmentOptions.BaselineLeft, Paper);
             serial = Label("Serial", "NO.0001  ·  LX-01", 19, 4, TextAlignmentOptions.BaselineRight, Paper);
             sector = Label("Sector", "SECTOR  //  00", 15, 4, TextAlignmentOptions.BaselineRight, Paper);
-            kicker = Label("Kicker", "WORD PUZZLE  //  VER 0.3", 21, 7, TextAlignmentOptions.BaselineLeft, Paper);
+            kicker = Label("Kicker", $"WORD PUZZLE  //  VER {Application.version}", 21, 7, TextAlignmentOptions.BaselineLeft, Paper);
             wordmarkMask = Ui.Rect("Wordmark", root);
             wordmarkMask.pivot = new Vector2(0, 0.5f);
             wordmarkMask.gameObject.AddComponent<RectMask2D>();
@@ -82,6 +91,12 @@ namespace Lexiscript
             instruction = Label("Instruction", TitleScreen.Instruction, 40, 1, TextAlignmentOptions.BaselineLeft, Ink);
             status = Label("Status", Waiting, 19, 5, TextAlignmentOptions.BaselineLeft, Paper);
             copyright = Label("Copyright", "© 2026  LEXISCRIPT", 19, 4, TextAlignmentOptions.BaselineRight, Paper);
+            quit = Ui.Rect("Quit", root);
+            quit.anchorMin = quit.anchorMax = quit.pivot = new Vector2(0.5f, 0.5f);
+            quit.sizeDelta = new Vector2(QuitWidth, QuitHeight);
+            quitShape = Ui.Shape("Shape", quit);
+            Ui.Fill(quitShape.rectTransform);
+            quitLabel = Label("Label", "QUIT GAME", 18, 6, TextAlignmentOptions.BaselineLeft, Paper, quit);
             overlay = Ui.Shape("Overlay", root);
 
             wordmarkWidth = Advance(wordmark, wordmark.text.Length - 1);
@@ -120,6 +135,7 @@ namespace Lexiscript
                 settled = !animating;
             }
             DrawPointer(t, block, unit, solved);
+            DrawQuit(t, size);
             DrawOverlay(t, size, solved);
         }
 
@@ -240,6 +256,36 @@ namespace Lexiscript
             pointer.Add(Box(textLeft + chipStart - 6, y - 24, textLeft + chipEnd + 6, y + 24), Alpha(Gold, shown));
             pointer.Add(Square(new Vector2(right, y), 6 * Ease.OutBack(Progress(t, 0.7f, 0.3f))), Gold);
             Show(instruction, new Vector2(textLeft, y - 14), shown);
+        }
+
+        /// <summary>
+        /// 右下角的離開按鈕：細框斜切標籤、左側淺金細條、右側一個「出口」箭頭。滑鼠移上去時整塊填成淺金、字變墨色。
+        /// 每幀重畫（滑過的動畫），不放進只在版面改變時重畫的裝飾層。
+        /// </summary>
+        void DrawQuit(float t, Vector2 size)
+        {
+            float shown = Ease.OutCubic(Progress(t, 0.9f, 0.4f));
+            float right = size.x / 2 - Right, bottom = -size.y / 2 + QuitBottom;
+            quit.anchoredPosition = new Vector2(right - QuitWidth / 2 + 24 * (1 - shown), bottom + QuitHeight / 2);
+            var mouse = Mouse.current;
+            bool over = shown > 0.5f && mouse != null && Ui.Contains(quit, mouse.position.ReadValue());
+            quitHover = Mathf.MoveTowards(quitHover, over ? 1 : 0, Time.unscaledDeltaTime / HoverSeconds);
+            float hover = Ease.OutCubic(quitHover);
+
+            quitShape.Clear();
+            float w = QuitWidth / 2, h = QuitHeight / 2;
+            var outline = new List<Vector2> { new Vector2(-w, -h), new Vector2(w - QuitCut, -h), new Vector2(w, -h + QuitCut), new Vector2(w, h), new Vector2(-w, h) };
+            var inner = new List<Vector2> { new Vector2(-w + 2, -h + 2), new Vector2(w - QuitCut - 1, -h + 2), new Vector2(w - 2, -h + QuitCut + 1), new Vector2(w - 2, h - 2), new Vector2(-w + 2, h - 2) };
+            quitShape.Add(outline, Alpha(Color.Lerp(Leader, Gold, hover), shown));
+            quitShape.Add(inner, Alpha(Color.Lerp(Ink, Gold, hover), shown));
+            quitShape.Add(Box(-w + 2, -h + 2, -w + 6, h - 2), Alpha(Gold, shown));
+            var arrow = Color.Lerp(Paper, Ink, hover);
+            var at = new Vector2(w - 28, 0);
+            quitShape.Add(Box(at.x - 10, at.y - 1.5f, at.x + 4, at.y + 1.5f), Alpha(arrow, shown));
+            quitShape.Add(new List<Vector2> { at + new Vector2(2, -7), at + new Vector2(10, 0), at + new Vector2(2, 7) }, Alpha(arrow, shown));
+            quitShape.Add(Box(at.x + 12, at.y - 9, at.x + 14.5f, at.y + 9), Alpha(arrow, shown));
+            quitLabel.color = Color.Lerp(Paper, Ink, hover);
+            Show(quitLabel, new Vector2(18, -7), shown);
         }
 
         /// <summary>字標進場時跟著遮罩邊緣掃過的金色游標，以及狀態列閃爍的游標。</summary>

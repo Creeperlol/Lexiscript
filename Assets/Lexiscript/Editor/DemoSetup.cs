@@ -26,7 +26,7 @@ namespace Lexiscript
 
             var boardObject = SceneBuilder.BeginBoard();
             var board = boardObject.transform;
-            var p = Add(board, material, "P", 2, 8, PureWhite, Beveled, "perpetual", "Byzantium", "constant", "eternal", "endless", "everlasting", "permanent");
+            var p = Add(board, material, "P", 2, 8, PureWhite, Beveled, "perpetual", "Byzantium");
             var l = Add(board, material, "L", 1, 8, PureWhite, Plain, "", "constant");
             var y = Add(board, material, "Y", 3, 8, BrightYellow, Beveled, "", "Constantinople", "constantly");
             var g = Add(board, material, "G", 4, 8, GoldenBrown, Plain, "", "");

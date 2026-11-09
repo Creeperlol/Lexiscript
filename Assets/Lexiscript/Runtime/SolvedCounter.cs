@@ -61,11 +61,23 @@ namespace Lexiscript
                 board = FindAnyObjectByType<Board>();
                 if (board != null) board.Solved += OnSolved;
             }
-            int count = board != null && board.Puzzle != null ? board.Puzzle.SolvedCount : 0;
+            int count = board != null && board.Puzzle != null ? Unlocked(board) : 0;
             // 讀檔還原不會觸發 Board.Solved，那種變化直接換數字
             if (count != Count) Show(count, solvedByPlayer && count > Count);
             solvedByPlayer = false;
             Animate();
+        }
+
+        /// <summary>
+        /// 只算已經解鎖（沒被遮罩蓋住）的區域裡解開的題目：改版後舊存檔裡解過、但現在搬進還沒開的房間的題目，
+        /// 等房間打開才算進來，數字才跟玩家看得到的一致。
+        /// </summary>
+        static int Unlocked(Board board)
+        {
+            int count = 0;
+            foreach (var block in board.Blocks)
+                if (board.Puzzle.IsSolved(block.name) && !RoomCover.Hides(block.transform.position)) count++;
+            return count;
         }
 
         void Show(int count, bool animate)

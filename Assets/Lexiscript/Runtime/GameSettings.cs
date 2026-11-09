@@ -31,6 +31,7 @@ namespace Lexiscript
             public string language = nameof(Lexiscript.Language.English);
             public bool showSolvedCounter = true;
             public string playerStyle = nameof(Lexiscript.PlayerStyle.Pixel);
+            public bool confirmTeleport = true;
         }
 
         /// <summary>存檔位置；null 代表 persistentDataPath/settings.json。測試改到暫存檔，以免蓋掉玩家的設定。</summary>
@@ -67,6 +68,13 @@ namespace Lexiscript
         {
             get => Parse(Current.playerStyle, Lexiscript.PlayerStyle.Pixel);
             set => Update(d => d.playerStyle = value.ToString());
+        }
+
+        /// <summary>傳送前先跳出「即將前往……是否確定」。</summary>
+        public static bool ConfirmTeleport
+        {
+            get => Current.confirmTeleport;
+            set => Update(d => d.confirmTeleport = value);
         }
 
         /// <summary>丟掉記憶體裡的設定，下次讀取時重新從檔案載入（換了 <see cref="StoragePath"/> 之後呼叫）。</summary>

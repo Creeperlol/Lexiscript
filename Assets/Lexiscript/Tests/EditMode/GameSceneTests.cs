@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Lexiscript
 {
-    /// <summary>正式關卡（教學房間＋開放式大地圖＋門後房間）的內容與擺放。</summary>
+    /// <summary>正式關卡（教學房間＋大廳＋以門相連的房間網路）的內容與擺放。</summary>
     public sealed class GameSceneTests
     {
         static readonly string[] ControlLines =
@@ -43,32 +43,29 @@ namespace Lexiscript
                 .ToArray();
         }
 
-        int RoomOf(Vector2 point) => System.Array.FindIndex(rooms.floors, floor => floor.Contains(point));
+        /// <summary>這一點所在的房間（走道、側間、橋算它們所屬那間房的主要地板）。</summary>
+        int RoomOf(Vector2 point) => rooms.Owner(System.Array.FindIndex(rooms.floors, floor => floor.Contains(point)));
 
         bool IsTutorial(int room) => rooms.kinds[room] == RoomKind.Tutorial;
 
         int Field => System.Array.IndexOf(rooms.kinds, RoomKind.Field);
 
-        IEnumerable<int> RoomsOf(RoomKind kind) => Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.kinds[i] == kind);
+        IEnumerable<int> RoomsOf(RoomKind kind) => Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.kinds[i] == kind && rooms.Owner(i) == i);
 
         IEnumerable<string> TextsIn(int room) => floorTexts.Where(text => RoomOf(text.transform.position) == room).Select(text => text.text);
 
-        /// <summary>門口兩側接著的地板。</summary>
+        /// <summary>門口兩側接著的房間。</summary>
         int[] Sides(Rect doorway)
         {
             var touching = new Rect(doorway.position - Vector2.one * 0.01f, doorway.size + Vector2.one * 0.02f);
-            return Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.floors[i].Overlaps(touching)).ToArray();
+            return Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.floors[i].Overlaps(touching)).Select(rooms.Owner).Distinct().ToArray();
         }
-
-        Door DoorIn(Rect doorway) => doors.Single(door => doorway.Contains(door.transform.position));
 
         Rect DoorwayOf(Door door) => rooms.doorways.Single(doorway => doorway.Contains(door.transform.position));
 
-        /// <summary>這扇門打開後露出的地板（遮罩蓋著的那一塊）。</summary>
-        int Behind(Door door) => System.Array.IndexOf(rooms.floors, covers.Single(cover => cover.door == door).area);
 
         [Test]
-        public void IsBuiltAsTutorialRoomsThenTheWorldAndItsGatedRooms()
+        public void IsBuiltAsTutorialRoomsThenTheHallAndANetworkOfRooms()
         {
             Assert.AreEqual(rooms.floors.Length, rooms.kinds.Length);
             var tutorial = RoomsOf(RoomKind.Tutorial).ToList();
@@ -76,9 +73,9 @@ namespace Lexiscript
             CollectionAssert.AreEqual(Enumerable.Range(0, tutorial.Count), tutorial, "教學房間排在最前面");
             for (int i = 1; i < tutorial.Count; i++)
                 Assert.Greater(rooms.floors[i].xMin, rooms.floors[i - 1].xMax, "教學房間由左而右");
-            Assert.AreEqual(1, RoomsOf(RoomKind.Field).Count(), "一張開放式大地圖");
-            Assert.Greater(rooms.floors[Field].xMin, rooms.floors[tutorial.Count - 1].xMax, "大地圖在教學之後");
-            Assert.GreaterOrEqual(RoomsOf(RoomKind.Gated).Count(), 1, "至少一間門後房間");
+            Assert.AreEqual(1, RoomsOf(RoomKind.Field).Count(), "一間大廳");
+            Assert.Greater(rooms.floors[Field].xMin, rooms.floors[tutorial.Count - 1].xMax, "大廳在教學之後");
+            Assert.GreaterOrEqual(RoomsOf(RoomKind.Gated).Count(), 10, "大廳之外還有許多間門後房間可以探索");
             Assert.AreEqual(rooms.doorways.Length, doors.Length, "每個門口都有門");
             Assert.AreEqual(0, RoomOf(Object.FindAnyObjectByType<Player>().transform.position), "從第一間教學房間開始");
 
@@ -88,25 +85,55 @@ namespace Lexiscript
             {
                 int next = i + 1 < tutorial.Count ? i + 1 : Field;
                 Assert.AreEqual(1, links.Count(sides => sides.Contains(i) && sides.Contains(next)), $"第 {i + 1} 間的出口通往下一塊地板");
+                Assert.AreEqual(i == 0 ? 1 : 2, links.Count(sides => sides.Contains(i)), $"第 {i + 1} 間只有進出兩個門口");
             }
-            foreach (int room in RoomsOf(RoomKind.Gated))
+            Assert.GreaterOrEqual(links.Count(sides => sides.Contains(Field)), 4, "大廳往好幾個方向分岔");
+            Assert.IsTrue(RoomsOf(RoomKind.Gated).Any(room => links.Count(sides => sides.Contains(room)) >= 3), "有房間是交叉路口");
+        }
+
+        [Test]
+        public void EveryDoorCanBeOpenedWithPuzzlesAlreadyInReach()
+        {
+            // 從第一間開始，只解得到已經打開的房間裡的題目，一扇扇開門；最後每扇門都要打得開，不能卡死。
+            // 門前題目（門口旁邊那幾格）用到的顏色與形狀，要在已經走得到的房間裡看得到別的例子，玩家才有機會推出規則
+            var gates = new HashSet<Block>(doors.SelectMany(door => door.blocks.Where(block =>
+                Vector2.Distance(block.transform.position, DoorwayOf(door).center) <= 4.5f)));
+            var open = new HashSet<int> { 0 };
+            var opened = new HashSet<Door>();
+            bool progress = true;
+            while (progress)
             {
-                Assert.AreEqual(1, links.Count(sides => sides.Contains(room)), "門後房間只有一個門口");
-                Assert.IsTrue(links.Any(sides => sides.Contains(room) && sides.Contains(Field)), "門後房間的門開在大地圖上");
+                progress = false;
+                foreach (var door in doors.Where(door => !opened.Contains(door)).ToList())
+                {
+                    if (!door.blocks.All(block => open.Contains(RoomOf(block.transform.position)))) continue;
+                    var known = new HashSet<(BlockColor, BlockShape)>(blocks
+                        .Where(block => !block.IsPure && !gates.Contains(block) && open.Contains(RoomOf(block.transform.position)))
+                        .Select(block => (block.color, block.shape)));
+                    var unknown = door.blocks.Where(block => gates.Contains(block) && !known.Contains((block.color, block.shape))).ToList();
+                    Assert.IsEmpty(unknown, $"{string.Join(", ", unknown.Select(block => block.name))} 用到的顏色在走得到的地方還沒出現過");
+                    opened.Add(door);
+                    open.UnionWith(Sides(DoorwayOf(door)));
+                    progress = true;
+                }
             }
+            CollectionAssert.AreEquivalent(doors, opened, "有門永遠打不開");
+            Assert.AreEqual(Enumerable.Range(0, rooms.floors.Length).Select(rooms.Owner).Distinct().Count(), open.Count, "有房間永遠進不去");
         }
 
         [Test]
         public void TheWorldIsMuchBiggerThanAScreenWithPuzzlesRightPastTheEntrance()
         {
-            var field = rooms.floors[Field];
+            var world = Enumerable.Range(0, rooms.floors.Length).Where(i => !IsTutorial(i)).Select(i => rooms.floors[i]).ToList();
+            float width = world.Max(f => f.xMax) - world.Min(f => f.xMin), height = world.Max(f => f.yMax) - world.Min(f => f.yMin);
             float screenWidth = 2 * Art.CameraSize * 16 / 9, screenHeight = 2 * Art.CameraSize;
-            Assert.Greater(field.width, 2.5f * screenWidth, "大地圖要比一個畫面大很多，才有探索的感覺");
-            Assert.Greater(field.height, 2 * screenHeight);
-            var entrance = rooms.doorways.Single(d => Sides(d).Contains(Field) && Sides(d).Any(IsTutorial));
+            Assert.Greater(width, 4 * screenWidth, "大地圖要比一個畫面大很多，才有探索的感覺");
+            Assert.Greater(height, 4 * screenHeight);
+            // 走過橋、一踏進大廳就看得到題目
+            var entrance = new Vector2(rooms.floors[Field].xMin, 0);
             float nearest = blocks.Where(block => RoomOf(block.transform.position) == Field)
-                .Min(block => Vector2.Distance(block.transform.position, entrance.center));
-            Assert.Less(nearest, screenWidth / 2 + Art.Pitch, "一進大地圖就看得到題目");
+                .Min(block => Vector2.Distance(block.transform.position, entrance));
+            Assert.Less(nearest, screenWidth / 2 + Art.Pitch, "一進大廳就看得到題目");
         }
 
         [Test]
@@ -121,6 +148,7 @@ namespace Lexiscript
             LevelChecks.LinksJoinNeighbours(blocks);
             LevelChecks.BridgedBlocksShareTheirAnswer(blocks);
             LevelChecks.CellKindsHaveTheirIncomingLinks(blocks);
+            LevelChecks.ChainsIntoSolidBlocksDoNotHintTheirMiddleWords(blocks);
             foreach (var (from, link) in LevelChecks.Links(blocks))
                 Assert.AreEqual(RoomOf(from.transform.position), RoomOf(link.target.transform.position), $"{from.name} 連到別的房間");
         }
@@ -129,6 +157,63 @@ namespace Lexiscript
         public void EverythingIsInsideTheRooms()
         {
             LevelChecks.EverythingIsInsideTheRooms(rooms, blocks, Object.FindAnyObjectByType<Player>());
+        }
+
+        [Test]
+        public void ABridgeLeadsFromTheTutorialIntoTheHall()
+        {
+            var bridges = Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.kinds[i] == RoomKind.Bridge).ToList();
+            Assert.AreEqual(1, bridges.Count, "教學出口與大廳之間一座橋");
+            var bridge = rooms.floors[bridges[0]];
+            Assert.AreEqual(Field, rooms.Owner(bridges[0]), "橋是大廳的一部分，跟著大廳一起掀開");
+            Assert.AreEqual(rooms.floors[Field].xMin, bridge.xMax, 1e-3f, "橋接著大廳的左牆");
+            var exit = rooms.doorways.Single(d => Sides(d).Contains(Field) && Sides(d).Any(IsTutorial));
+            Assert.AreEqual(exit.xMax, bridge.xMin, 1e-3f, "橋的另一頭就是教學出口");
+            Assert.Greater(bridge.width, 2 * bridge.height, "橋又長又窄");
+            var entry = Object.FindAnyObjectByType<WorldEntry>();
+            Assert.IsNotNull(entry, "第一次過橋的演出");
+            Assert.AreEqual(bridge, entry.bridge);
+            Assert.AreEqual(rooms.floors[Field], entry.hall);
+        }
+
+        [Test]
+        public void RoomsAreNotAllPlainBoxes()
+        {
+            var parts = Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.Owner(i) != i && rooms.kinds[i] != RoomKind.Bridge).ToList();
+            Assert.GreaterOrEqual(parts.Count, 15, "房間之間有走道、有的房間還有側間");
+            var world = RoomsOf(RoomKind.Gated).Select(i => rooms.floors[i]).ToList();
+            Assert.Greater(world.Select(f => Mathf.Round(f.width)).Distinct().Count(), 5, "房間大小不一");
+            Assert.Greater(world.Select(f => Mathf.Round(f.xMin)).Distinct().Count(), 6, "房間沒有排成整齊的棋盤");
+            Assert.GreaterOrEqual(rooms.obstacles.Length, 10, "地圖上有擋路的柱子與盆栽");
+            // 房間本身切過角、凹過口：跟主要地板直接相接（中間沒有門口）的同一間房地板
+            int shaped = RoomsOf(RoomKind.Gated).Count(room => Enumerable.Range(0, rooms.floors.Length).Any(i => i != room && rooms.Owner(i) == room
+                && rooms.floors[i].Overlaps(new Rect(rooms.floors[room].position - Vector2.one * 0.01f, rooms.floors[room].size + Vector2.one * 0.02f))));
+            Assert.GreaterOrEqual(shaped, 10, "大部分房間不是單純的長方形");
+            Assert.GreaterOrEqual(rooms.obstacles.Select(o => (Mathf.Round(o.width * 10), Mathf.Round(o.height * 10))).Distinct().Count(), 6, "擺設有很多種");
+        }
+
+        [Test]
+        public void TeleportPointsStandOnOpenFloor()
+        {
+            var points = Object.FindObjectsByType<TeleportPoint>(FindObjectsSortMode.None).OrderBy(point => point.order).ToList();
+            Assert.GreaterOrEqual(points.Count, 4);
+            Assert.AreEqual(("Tutorial", "教學關"), (points[0].english, points[0].chinese), "第一個是教學關（出生點）");
+            Assert.AreEqual((Vector2)Object.FindAnyObjectByType<Player>().transform.position, (Vector2)points[0].transform.position);
+            Assert.AreEqual(("World Gate", "大世界起點"), (points[1].english, points[1].chinese), "第二個是大世界起點");
+            Assert.AreEqual(Field, RoomOf(points[1].transform.position));
+            CollectionAssert.AllItemsAreUnique(points.Select(point => point.order));
+            float clearance = Art.Half + Art.PlayerHalf;
+            foreach (var point in points)
+            {
+                Vector2 at = point.transform.position;
+                Assert.IsTrue(rooms.floors.Any(floor => floor.Contains(at)), point.english);
+                foreach (var block in blocks)
+                {
+                    Vector2 c = block.transform.position;
+                    Assert.IsTrue(Mathf.Abs(at.x - c.x) > clearance || Mathf.Abs(at.y - c.y) > clearance, $"{point.english} 站在 {block.name} 上");
+                }
+                Assert.IsFalse(rooms.obstacles.Any(obstacle => obstacle.Contains(at)), $"{point.english} 站在擺設上");
+            }
         }
 
         [Test]
@@ -209,15 +294,9 @@ namespace Lexiscript
                 Assert.IsNotEmpty(door.blocks, door.name);
                 Assert.AreEqual(door.blocks.Length, door.required, "門要全部答對才開，不是差一題就開");
                 Assert.AreEqual($"0/{door.required}", door.counter.text);
-                int behind = Behind(door);
                 var sides = Sides(DoorwayOf(door));
-                CollectionAssert.Contains(sides, behind);
-                if (rooms.kinds[behind] == RoomKind.Gated)
-                {
-                    Assert.IsTrue(door.blocks.All(block => RoomOf(block.transform.position) == Field), "門後房間的門算的是門前那道題");
-                    continue;
-                }
-                int room = sides.Single(side => side != behind);
+                if (!sides.Any(IsTutorial)) continue;
+                int room = sides.Min();
                 Assert.IsTrue(IsTutorial(room), "教學房間的出口門");
                 Assert.IsTrue(door.blocks.All(block => RoomOf(block.transform.position) == room), $"第 {room + 1} 間的門只算自己房間的題目");
                 Assert.AreEqual(blocks.Count(block => !string.IsNullOrEmpty(block.answer) && RoomOf(block.transform.position) == room), door.blocks.Length,
@@ -249,8 +328,8 @@ namespace Lexiscript
             for (int i = 1; i < rooms.floors.Length; i++)
             {
                 var cover = covers.Single(c => c.area == rooms.floors[i]);
-                Assert.IsNotNull(cover.door, cover.name);
-                CollectionAssert.Contains(Sides(DoorwayOf(cover.door)), i, $"{cover.name} 跟著通往這塊地板的門");
+                var entries = doors.Where(door => Sides(DoorwayOf(door)).Contains(rooms.Owner(i))).ToList();
+                CollectionAssert.AreEquivalent(entries, cover.doors, $"{cover.name} 跟著通往這塊地板的每一扇門，從哪扇進來都會掀開");
                 Assert.AreEqual(cover.area.center, (Vector2)cover.transform.position, cover.name);
                 Assert.AreEqual(Art.CoverOrder, cover.GetComponent<MeshRenderer>().sortingOrder, cover.name);
                 foreach (var doorway in rooms.doorways)
@@ -268,16 +347,23 @@ namespace Lexiscript
         [Test]
         public void CoversLiftFromTheirDoorSide()
         {
-            foreach (var cover in covers)
+            // 只看畫鎖的那塊主要地板：走道、側間離門可能很遠，跟著一起收起就好
+            // 地面只會被教學出口掀開：其他通往地面的門都要站在地面上才開得到，那時地面早就掀開了
+            foreach (var (cover, entry) in covers.Where(cover => cover.locked).SelectMany(cover => cover.doors.Select(door => (cover, door)))
+                .Where(x => x.cover.area != rooms.floors[Field] || Sides(DoorwayOf(x.door)).Any(IsTutorial)))
             {
-                Vector2 size = cover.area.size, door = (Vector2)cover.door.transform.position - cover.area.center;
+                // 同一間房的幾塊遮罩照整間房的範圍一起擦
+                var frame = cover.frame.width > 0 ? cover.frame : cover.area;
+                Assert.IsTrue(frame.xMin <= cover.area.xMin && frame.yMin <= cover.area.yMin && frame.xMax >= cover.area.xMax && frame.yMax >= cover.area.yMax, cover.name);
+                Vector2 size = frame.size, door = (Vector2)entry.transform.position - frame.center;
                 var inward = Art.CoverInward(size, door);
                 Assert.Greater(Vector2.Dot(door, -inward), 0, $"{cover.name} 要從門那一側收起");
                 // 門口內側一點，與正對面的牆邊
                 var across = new Vector2(Mathf.Abs(inward.y), Mathf.Abs(inward.x));
                 float depth = Vector2.Dot(size / 2, new Vector2(Mathf.Abs(inward.x), Mathf.Abs(inward.y)));
                 var near = Vector2.Scale(door, across) - inward * (depth - 0.5f);
-                var far = Vector2.Scale(door, across) + inward * (depth - 0.5f);
+                // 對面取牆的正中間：門不在牆中間時（大廳這種長房間），斜著擦的切線會先掃到門那一排的對面
+                var far = inward * (depth - 0.5f);
                 Assert.IsTrue(Art.CoverRemains(size, inward, 0, near) && Art.CoverRemains(size, inward, 0, far), cover.name);
                 Assert.IsFalse(Art.CoverRemains(size, inward, 0.5f, near), $"{cover.name}：收到一半時門口那邊已經露出來");
                 Assert.IsTrue(Art.CoverRemains(size, inward, 0.5f, far), $"{cover.name}：收到一半時對面還蓋著");
@@ -286,23 +372,18 @@ namespace Lexiscript
         }
 
         [Test]
-        public void GatePuzzlesSitBesideTheirDoorsOnTheFieldSide()
+        public void GatePuzzlesSitBesideTheirDoorsWithoutBlockingThem()
         {
-            foreach (int room in RoomsOf(RoomKind.Gated))
+            int gates = 0;
+            foreach (var door in doors.Where(door => !Sides(DoorwayOf(door)).Any(IsTutorial)))
             {
-                var doorway = rooms.doorways.Single(d => Sides(d).Contains(room));
-                var door = DoorIn(doorway);
-                Assert.AreEqual(room, Behind(door));
-                foreach (var block in door.blocks)
+                var doorway = DoorwayOf(door);
+                var near = door.blocks.Where(block => Vector2.Distance(block.transform.position, doorway.center) <= 4.5f).ToList();
+                if (near.Count > 0) gates++;
+                foreach (var block in near)
                 {
-                    Assert.AreEqual(Field, RoomOf(block.transform.position), $"{block.name} 要在大地圖這一側");
-                    Assert.IsFalse(rooms.kinds.Where((kind, i) => kind == RoomKind.Gated && rooms.floors[i].Overlaps(LevelChecks.Bounds(block))).Any());
-                }
-                float nearest = door.blocks.Min(block => Vector2.Distance(block.transform.position, doorway.center));
-                Assert.LessOrEqual(nearest, 4.5f, $"{door.blocks[0].name} 要在門口旁邊");
-                // 門前題目不在門口正前方：與門口在沿著牆的方向上錯開
-                foreach (var block in door.blocks)
-                {
+                    CollectionAssert.Contains(Sides(doorway), RoomOf(block.transform.position), $"{block.name} 要在門口兩側的房間裡");
+                    // 門前題目不在門口正前方：與門口在沿著牆的方向上錯開
                     Vector2 c = block.transform.position;
                     bool beside = doorway.width > doorway.height
                         ? c.x - Art.Half >= doorway.xMax || c.x + Art.Half <= doorway.xMin
@@ -310,6 +391,7 @@ namespace Lexiscript
                     Assert.IsTrue(beside, $"{block.name} 擋在門口前面");
                 }
             }
+            Assert.GreaterOrEqual(gates, 10, "大部分的門前都有一道題");
         }
 
         [Test]
@@ -337,8 +419,15 @@ namespace Lexiscript
             foreach (var line in ControlLines) CollectionAssert.Contains(first, line);
             Assert.IsTrue(RoomsOf(RoomKind.Tutorial).SelectMany(TextsIn).Any(text => text.ToLowerInvariant().Contains("notes")), "教學要提到筆記");
             var world = floorTexts.Where(text => !IsTutorial(RoomOf(text.transform.position))).ToList();
-            Assert.LessOrEqual(world.Count, 1, "大地圖只有入口那一句，沒有提示");
-            Assert.IsTrue(world.All(text => text.name == "Text" && RoomOf(text.transform.position) == Field), "大地圖沒有題組說明");
+            var entry = world.Where(text => text.name == "Text").ToList();
+            Assert.LessOrEqual(entry.Count, 1, "大廳只有入口那一句");
+            Assert.IsTrue(entry.All(text => RoomOf(text.transform.position) == Field));
+            // 地板提示只出現在第一次遇到「鏈尾是純色格」的那一間，後面不再提示
+            var hints = world.Except(entry).ToList();
+            Assert.IsTrue(hints.All(text => text.name == "Hint"), "大地圖沒有題組說明");
+            Assert.AreEqual(1, hints.Select(text => RoomOf(text.transform.position)).Distinct().Count(), "提示只在一間房裡");
+            int hinted = RoomOf(hints[0].transform.position);
+            Assert.IsTrue(blocks.Any(block => block.IsPure && RoomOf(block.transform.position) == hinted), "提示所在的房間有純色格的鏈");
         }
 
         [Test]

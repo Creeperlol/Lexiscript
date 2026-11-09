@@ -43,7 +43,8 @@ namespace Lexiscript
             var doorway = rooms.doorways[0];
             var floor = rooms.floors[0];
             var next = rooms.floors[1];
-            var cover = Covers().Single(c => c.door == door);
+            var cover = Covers().Single(c => c.area == next);
+            Assert.AreEqual(door, cover.doors[0], "第二間的主要入口是第一扇門");
 
             // 拿掉遮罩再拍，才看得到每間教學房間的擺放；大地圖另外在 GatePuzzleOpensItsRoomAndTheCoverLifts 拍
             SetCoversVisible(false);
@@ -134,16 +135,23 @@ namespace Lexiscript
 
             var room = rooms.floors[System.Array.IndexOf(rooms.kinds, RoomKind.Gated)];
             var cover = Covers().Single(c => c.area == room);
-            var gate = cover.door;
+            var gate = cover.doors[0];
             Assert.IsFalse(gate.IsOpen);
             Assert.IsTrue(RoomCover.Hides(room.center), "門後房間還蓋著");
             Assert.AreEqual(gate.blocks.Length, gate.required);
-            Assert.IsTrue(gate.blocks.All(block => field.Contains(block.transform.position)), "門前題目在大地圖這一側");
+            int hall = System.Array.IndexOf(rooms.kinds, RoomKind.Field);
+            Assert.IsTrue(gate.blocks.All(block => rooms.Owner(RoomOf(rooms, block.transform.position)) == hall), "門前題目在大地圖這一側");
 
             var world = Encapsulate(rooms.floors.Where((_, i) => rooms.kinds[i] != RoomKind.Tutorial));
             InputHarness.Shot("80_world_map", world.center, Frame(world) + 1);
             SetCoversVisible(false);
             InputHarness.Shot("81_world_map_layout", world.center, Frame(world) + 1);
+            var mains = Enumerable.Range(0, rooms.floors.Length).Where(i => rooms.kinds[i] == RoomKind.Gated && rooms.Owner(i) == i).ToList();
+            for (int k = 0; k < mains.Count; k += 3)
+            {
+                var area = Encapsulate(Pieces(rooms, rooms.floors[mains[k]]));
+                InputHarness.Shot($"86_world_room{k / 3}", area.center, Frame(area) + 1.5f);
+            }
             SetCoversVisible(true);
 
             var doorway = rooms.doorways.Single(d => d.Contains(gate.transform.position));
@@ -171,11 +179,16 @@ namespace Lexiscript
             yield return new WaitForSeconds(RoomCover.RevealSeconds);
             Assert.IsFalse(cover.Covering);
             Assert.IsFalse(RoomCover.Hides(room.center));
+            // 門後是一條走道，走到房間裡要一點時間
             input.Hold(outward.x != 0 ? (outward.x > 0 ? Key.A : Key.D) : (outward.y > 0 ? Key.S : Key.W));
-            yield return new WaitForSeconds(1f);
+            // 走道中段的小廣場可能有噴水池擋在正中間，直直走不一定走得到房間裡；走過門口、進到這間房的走道就算
+            int target = System.Array.IndexOf(rooms.floors, room);
+            bool Inside() => RoomOf(rooms, body.position) is int at && at >= 0 && rooms.Owner(at) == target;
+            for (float until = Time.time + 4; !Inside() && Time.time < until;) yield return null;
+            yield return new WaitForSeconds(0.3f);
             input.Release();
             yield return null;
-            Assert.IsTrue(room.Contains(body.position), "門開了就走得進門後房間");
+            Assert.IsTrue(Inside(), "門開了就走得進門後房間");
         }
 
         [UnityTest]
@@ -185,11 +198,14 @@ namespace Lexiscript
             var board = Object.FindAnyObjectByType<Board>();
             var rooms = Object.FindAnyObjectByType<Rooms>();
             var room = rooms.floors[System.Array.IndexOf(rooms.kinds, RoomKind.Gated)];
-            var gate = Covers().Single(c => c.area == room).door;
+            var gate = Covers().Single(c => c.area == room).doors[0];
             var doorway = rooms.doorways.Single(d => d.Contains(gate.transform.position));
-            // 門口往房間裡兩步：門那一側留了走道，不會卡在牆或方塊裡
-            var inside = doorway.center - OutOf(room, doorway) * 2;
-            Assert.IsTrue(room.Contains(inside));
+            // 從門口穿過走道進到房間裡兩步：房間門那一側留了走道，不會卡在牆或方塊裡
+            var pieces = Pieces(rooms, room);
+            var inside = doorway.center;
+            while (!pieces.Any(piece => piece.Contains(inside))) inside -= OutOf(room, doorway) * 0.25f;
+            inside -= OutOf(room, doorway) * 2;
+            Assert.IsTrue(pieces.Any(piece => piece.Contains(inside)));
             var solved = board.Blocks
                 .Where(block => !string.IsNullOrEmpty(block.answer) && rooms.kinds[RoomOf(rooms, block.transform.position)] == RoomKind.Tutorial)
                 .Concat(gate.blocks)
@@ -202,12 +218,14 @@ namespace Lexiscript
             var body = Object.FindAnyObjectByType<Player>().GetComponent<Rigidbody2D>();
             var covers = Covers();
             RoomKind KindOf(RoomCover c) => rooms.kinds[System.Array.IndexOf(rooms.floors, c.area)];
+            int OwnerOf(RoomCover c) => rooms.Owner(System.Array.IndexOf(rooms.floors, c.area));
             var cover = covers.Single(c => c.area == room);
-            Assert.IsTrue(cover.door.IsOpen, "存檔裡門前題目已經解開");
+            Assert.IsTrue(cover.doors[0].IsOpen, "存檔裡門前題目已經解開");
             Assert.IsFalse(cover.Covering, "讀檔開的門，遮罩直接收起");
             Assert.AreEqual(0, cover.GetComponent<MeshFilter>().sharedMesh.vertexCount, "不播掀開的動畫");
-            Assert.IsFalse(covers.Single(c => KindOf(c) == RoomKind.Field).Covering, "教學全解開，大地圖也掀開");
-            Assert.IsTrue(covers.Where(c => c != cover && KindOf(c) == RoomKind.Gated).All(c => c.Covering), "其他門後房間還蓋著");
+            int hall = System.Array.IndexOf(rooms.kinds, RoomKind.Field);
+            Assert.IsFalse(covers.Where(c => OwnerOf(c) == hall).Any(c => c.Covering), "教學全解開，大地圖也掀開");
+            Assert.IsTrue(covers.Where(c => OwnerOf(c) != OwnerOf(cover) && KindOf(c) == RoomKind.Gated).All(c => c.Covering), "其他門後房間還蓋著");
             Assert.IsFalse(RoomCover.Hides(inside));
             Assert.Less(Vector2.Distance(inside, body.position), 0.05f, "站在已經打開的門後房間裡，讀檔後回到原位");
         }
@@ -267,6 +285,30 @@ namespace Lexiscript
         }
 
         static int RoomOf(Rooms rooms, Vector2 point) => System.Array.FindIndex(rooms.floors, floor => floor.Contains(point));
+
+        /// <summary>
+        /// 房間本身的幾塊地板（房間不全是長方形，拆成好幾塊）：從主要那塊開始，跟它直接相接、同一間房的地板。
+        /// 走道隔著門口，不算在內。
+        /// </summary>
+        static List<Rect> Pieces(Rooms rooms, Rect main)
+        {
+            int owner = System.Array.IndexOf(rooms.floors, main);
+            var pieces = new List<Rect> { main };
+            for (bool grew = true; grew;)
+            {
+                grew = false;
+                for (int i = 0; i < rooms.floors.Length; i++)
+                {
+                    var floor = rooms.floors[i];
+                    if (rooms.Owner(i) != owner || pieces.Contains(floor)) continue;
+                    var touching = new Rect(floor.position - Vector2.one * 0.01f, floor.size + Vector2.one * 0.02f);
+                    if (!pieces.Any(piece => piece.Overlaps(touching))) continue;
+                    pieces.Add(floor);
+                    grew = true;
+                }
+            }
+            return pieces;
+        }
 
         /// <summary>從房間穿過這個門口走出去的方向。</summary>
         static Vector2 OutOf(Rect room, Rect doorway)

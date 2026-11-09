@@ -59,16 +59,19 @@ namespace Lexiscript
 
         /// <param name="kinds">與 floors 一一對應的用途；Demo 這種只有一塊地板的場景不用給。</param>
         /// <param name="plots">大地圖分區與門後房間的地面標記（見 <see cref="Art.Plot"/>）。</param>
+        /// <param name="decor">地板花紋與擺設；會擋路的擺設也加上碰撞，範圍記在 <see cref="Lexiscript.Rooms.obstacles"/>。</param>
         public static Rooms Rooms(Material material, IList<Rect> floors, IList<Rect> doorways, string meshName, int seed,
-            IList<RoomKind> kinds = null, IList<(Rect area, BlockColor? accent, bool flipped)> plots = null)
+            IList<RoomKind> kinds = null, IList<(Rect area, BlockColor? accent, bool flipped)> plots = null, RoomsDecor decor = null)
         {
-            var mesh = Save(Art.Rooms(floors, doorways, seed, plots), meshName);
+            var mesh = Save(Art.Rooms(floors, doorways, seed, plots, decor), meshName);
             var go = Visual("Rooms", null, mesh, material, RoomOrder);
             var rooms = go.AddComponent<Rooms>();
             rooms.floors = floors.ToArray();
             rooms.doorways = doorways.ToArray();
             rooms.kinds = kinds?.ToArray() ?? new RoomKind[0];
-            foreach (var wall in Walls(floors, doorways))
+            var obstacles = decor?.Props == null ? new List<Rect>() : decor.Props.Where(prop => prop.Blocking).Select(prop => new Rect(prop.Center - prop.Size / 2, prop.Size)).ToList();
+            rooms.obstacles = obstacles.ToArray();
+            foreach (var wall in Walls(floors, doorways).Concat(obstacles))
             {
                 var collider = go.AddComponent<BoxCollider2D>();
                 collider.offset = wall.center;
@@ -77,12 +80,14 @@ namespace Lexiscript
             return rooms;
         }
 
-        /// <summary>每個房間四面的牆，扣掉門口。</summary>
+        /// <summary>每塊地板四面的牆，扣掉門口與相鄰的地板（走道、側間、橋跟房間之間沒有牆）。</summary>
         static IEnumerable<Rect> Walls(IList<Rect> floors, IList<Rect> doorways)
         {
             float t = Art.WallThickness;
-            foreach (var f in floors)
+            for (int i = 0; i < floors.Count; i++)
             {
+                var f = floors[i];
+                var holes = doorways.Concat(floors.Where((_, j) => j != i)).ToList();
                 var sides = new[]
                 {
                     Rect.MinMaxRect(f.xMin - t, f.yMin - t, f.xMin, f.yMax + t),
@@ -91,33 +96,9 @@ namespace Lexiscript
                     Rect.MinMaxRect(f.xMin, f.yMax, f.xMax, f.yMax + t),
                 };
                 foreach (var side in sides)
-                    foreach (var piece in Subtract(side, doorways))
+                    foreach (var piece in Shapes.Subtract(side, holes))
                         yield return piece;
             }
-        }
-
-        static IEnumerable<Rect> Subtract(Rect rect, IList<Rect> holes)
-        {
-            var pieces = new List<Rect> { rect };
-            foreach (var hole in holes)
-            {
-                var next = new List<Rect>();
-                foreach (var piece in pieces)
-                {
-                    if (!piece.Overlaps(hole))
-                    {
-                        next.Add(piece);
-                        continue;
-                    }
-                    float yMin = Mathf.Max(piece.yMin, hole.yMin), yMax = Mathf.Min(piece.yMax, hole.yMax);
-                    if (hole.yMax < piece.yMax) next.Add(Rect.MinMaxRect(piece.xMin, hole.yMax, piece.xMax, piece.yMax));
-                    if (hole.yMin > piece.yMin) next.Add(Rect.MinMaxRect(piece.xMin, piece.yMin, piece.xMax, hole.yMin));
-                    if (hole.xMin > piece.xMin) next.Add(Rect.MinMaxRect(piece.xMin, yMin, hole.xMin, yMax));
-                    if (hole.xMax < piece.xMax) next.Add(Rect.MinMaxRect(hole.xMax, yMin, piece.xMax, yMax));
-                }
-                pieces = next;
-            }
-            return pieces.Where(piece => piece.width > 1e-4f && piece.height > 1e-4f);
         }
 
         public static GameObject BeginBoard() => new GameObject("Board");
@@ -200,15 +181,39 @@ namespace Lexiscript
             return door;
         }
 
-        /// <summary>蓋住 door 打開前看不到的地板；遮罩在執行時才畫，所以編輯模式看得到裡面。</summary>
-        public static RoomCover Cover(Material material, string name, Rect area, Door door)
+        /// <summary>蓋住 doors 都還沒打開前看不到的地板；遮罩在執行時才畫，所以編輯模式看得到裡面。</summary>
+        /// <param name="frame">同一間房所有遮罩合起來的範圍，見 <see cref="RoomCover.frame"/>。</param>
+        public static RoomCover Cover(Material material, string name, Rect area, Door[] doors, bool locked = true, Rect frame = default)
         {
             var go = Visual(name, null, null, material, Art.CoverOrder);
             go.transform.position = area.center;
             var cover = go.AddComponent<RoomCover>();
             cover.area = area;
-            cover.door = door;
+            cover.doors = doors;
+            cover.locked = locked;
+            cover.frame = frame;
             return cover;
+        }
+
+        /// <summary>傳送介面列出的地點；order 是列表裡的順序。</summary>
+        public static TeleportPoint Teleport(string english, string chinese, Vector2 position, int order)
+        {
+            var go = new GameObject("Teleport " + english);
+            go.transform.position = position;
+            var point = go.AddComponent<TeleportPoint>();
+            point.english = english;
+            point.chinese = chinese;
+            point.order = order;
+            return point;
+        }
+
+        /// <summary>第一次走過教學出口那座橋時的演出；hall 是橋另一頭的大廳。</summary>
+        public static WorldEntry WorldEntry(Rect bridge, Rect hall)
+        {
+            var entry = new GameObject("World Entry").AddComponent<WorldEntry>();
+            entry.bridge = bridge;
+            entry.hall = hall;
+            return entry;
         }
 
         public static Spoiler Spoiler(Transform parent, Material material, Block block, Vector2 position)

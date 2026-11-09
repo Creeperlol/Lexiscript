@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Lexiscript
 {
@@ -61,6 +62,27 @@ namespace Lexiscript
         {
             if (Board != null) Board.Solved -= OnSolved;
             TextFocus.Unfocused -= OnUnfocusedText;
+        }
+
+        /// <summary>按下離開按鈕時執行；測試換掉它，以免真的關掉遊戲。</summary>
+        public static System.Action QuitGame { get; set; } = Quit;
+
+        public RectTransform QuitButton => art.QuitButton;
+
+        static void Quit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        }
+
+        void Update()
+        {
+            var mouse = Mouse.current;
+            if (art == null || Starting || !IntroFinished || mouse == null || !mouse.leftButton.wasPressedThisFrame) return;
+            if (Ui.Contains(art.QuitButton, mouse.position.ReadValue())) QuitGame();
         }
 
         void LateUpdate()
